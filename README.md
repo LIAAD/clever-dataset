@@ -13,6 +13,10 @@
 │   └── news_articles/
 │       └── *.txt
 │
+├── synthetic_questions_sample/
+│   ├── annotations.jsonl
+│   └── annotations.pretty.json
+│
 ├── generative_baselines/
 │   ├── configs/
 │   ├── split/
@@ -292,7 +296,7 @@ Micro-F1 is 0.5220 for Claim/Non-Claim and 0.5652 for the claim attributes (Macr
 
 One or more verification questions were manually formulated for each claim span, to represent the factual information needed for its verification in a form suitable for evidence retrieval. The questions take into account the claim object of the claim span and any other annotated information needed to preserve its meaning:
 
-* questions are centered on the claim span and linked to its claim object, and a claim with several claim spans has independent questions for each of them;
+* questions are centered on the claim span and focus on its claim object (the most specific term of the claim span), and a claim with several claim spans has independent questions for each of them;
 * the aim is to formulate two questions: a **general** question on the broad theme of the claim object and a **specific** question on the factual elements that require validation, such as numbers, dates, measures or names of institutions; a single question is formulated when the claim span cannot be split, and more questions when it has further facts to verify;
 * pronouns are replaced by the names of the entities they refer to;
 * questions are neutral, focus on the alleged fact rather than on the opinion of the claimer, and do not depend on whether the claimer affirms or refutes it;
@@ -349,6 +353,66 @@ The dataset is divided into **train** and **test** subsets at the article level:
 
 ---
 
+## Synthetic Questions
+
+[ClaimPT](https://github.com/LIAAD/ClaimPT) is a dataset of European Portuguese news articles from LUSA annotated with the claim scheme on which CLEVER is grounded, without verification questions. To provide additional training data for verification question generation (**Silver1073** in [Baselines](#baselines)), questions were generated automatically for the 522 claim spans in its data files. They are silver-standard data: only a sample was checked manually.
+
+### Generation
+
+Each claim span was sent in a separate request to `gemini-3.5-flash`, with temperature 0.0 and the output constrained to JSON (`{"questions": [...]}`). The prompt, in European Portuguese, contained the task instruction, question-formulation criteria based on those of CLEVER (see [Verification Questions](#verification-questions)) and six demonstrations built from CLEVER claim spans, each with example questions, followed by the claim span to process, its claim objects and claimers, the publication date and the article as context.
+
+| **Property** | **Value** |
+|---|---|
+| **Claim Spans** | 522 |
+| **Synthetic Questions** | 1,073 |
+| **Questions per Claim Span** | 2.06 |
+| **Claim Spans with 2 Questions** | 493 |
+| **Claim Spans with 3 Questions** | 29 |
+
+### Manual Evaluation
+
+A simple random sample of 50 claim spans (seed 42), with 104 questions, was evaluated manually in two dimensions: the general quality of the questions and their adherence to the question-formulation criteria of CLEVER. The evaluation was carried out by one of the authors and is a quality check, not an independent annotation. Each criterion is judged as met or not met and is counted in its own unit: the question (104) or the claim span (50; 30 for special-case compliance).
+
+**General quality**
+
+| **Criterion** | **Requirement** | **Compliance** |
+|---|---|---|
+| **Relevance** | The question verifies the claim span, not peripheral information from the article, and does not repeat a previous question of the same claim span | 100/104 (96.2%) |
+| **Faithfulness** | The question is consistent with the claim span and its context, without unsupported facts, entities, numbers or temporal information | 97/104 (93.3%) |
+| **Clarity and searchability** | The question is self-contained and understandable in isolation: pronouns, vague references and institutions designated only by their role (e.g., *the Government*) are replaced by the names of the entities or places | 100/104 (96.2%) |
+| **Temporal and local anchor** | The question includes the date, region or place when they are needed to make the verification unambiguous | 103/104 (99.0%) |
+
+**Adherence to the question-formulation criteria of CLEVER**, other than those already assessed by general quality (focus on the claim span, pronouns, temporal boundaries and regions)
+
+| **Criterion** | **Requirement** | **Unit** | **Compliance** |
+|---|---|---|---|
+| **General-specific structure** | A general question on the central fact and a more specific question on further information needed to verify it; when the claim span does not allow this distinction, the questions stay on the central fact without redundant paraphrases | Claim span | 34/50 (68.0%) |
+| **Claim-object adherence** | The question is centered on the claim object of the claim span | Question | 92/104 (88.5%) |
+| **Neutrality and factual focus** | The question asks for factual information without presupposing that the claim is true or false and without shifting the focus to the opinion, intention or credibility of the claimer | Question | 103/104 (99.0%) |
+| **Special-case compliance** | The questions include the claimer when the validity of the fact depends on who states it, cover both terms of a comparison, and allow a study, report, poll or other document referred to in the claim span to be identified | Claim span | 26/30 (86.7%) |
+
+Special-case compliance is counted over the 30 claim spans to which at least one of the three cases applies, and a claim span complies only when all the cases that apply to it are satisfied.
+
+### Sample
+
+`synthetic_questions_sample/` has the synthetic questions of the 17 claim spans in the 8 articles with claims of the [ClaimPT sample](https://github.com/LIAAD/ClaimPT/tree/main/dataset_sample) (35 questions). Each line of `annotations.jsonl` is one of these articles in the format of the ClaimPT sample, with its claims only and a `questions` list in each claim span (`annotations.pretty.json` has the same articles, indented); the article texts are in the ClaimPT sample. For example:
+
+```json
+"claim_span": {
+  "text": "foi convidado para aderir não pelo lado monárquico, no qual, aliás, não insistiam muito, mas por se empenhar, acima de tudo, na defesa do ambiente e na preservação da qualidade de vida",
+  "begin": 501,
+  "end": 685,
+  "questions": [
+    "Qual foi o motivo da inclusão do Partido Popular Monárquico (PPM) na Aliança Democrática (AD) em 1980?",
+    "O PPM foi convidado a integrar a Aliança Democrática em 1980 devido ao seu empenho na defesa do ambiente e da qualidade de vida, e não pela sua vertente monárquica?"
+  ]
+}
+```
+
+The complete set (522 claim spans and 1,073 questions) is distributed with ClaimPT, under its access conditions.
+
+---
+
 ## Baselines
 
 Verification question generation is modeled as a **text-to-text generation task**: given a claim span *s*, its context *c* in the article and the publication date *p* of the article, a model generates a variable-sized set of verification questions *Q = G(s, c, p)*. The context supports the interpretation of references and implicit information in the claim span, and the publication date provides temporal grounding.
@@ -364,7 +428,7 @@ Fourteen pre-trained language models with publicly available weights, evaluated 
 
 * **Zero-shot:** the model receives only the task instruction and the input;
 * **3-shot:** three annotated claim spans of the training subset, with one, two and three reference questions, are included in the prompt;
-* **Fine-tuning:** the model is trained to generate the questions from the claim span, its context and the publication date. **Gold91** is the 91 questions of the 40 training claim spans, and **Silver1073** the 1,073 synthetic questions generated for 522 claim spans of [ClaimPT](https://github.com/LIAAD/ClaimPT). Six supervision configurations are compared: Gold91, Silver1073, and Gold91 with cumulative subsets of 266, 535, 802 and 1,073 synthetic questions. Models below 1B parameters are fully fine-tuned, models from 1B to below 7B use LoRA, and models of 7B or more use QLoRA.
+* **Fine-tuning:** the model is trained to generate the questions from the claim span, its context and the publication date. **Gold91** is the 91 questions of the 40 training claim spans, and **Silver1073** the 1,073 synthetic questions generated for 522 claim spans of [ClaimPT](https://github.com/LIAAD/ClaimPT) (see [Synthetic Questions](#synthetic-questions)). Six supervision configurations are compared: Gold91, Silver1073, and Gold91 with cumulative subsets of 266, 535, 802 and 1,073 synthetic questions. Models below 1B parameters are fully fine-tuned, models from 1B to below 7B use LoRA, and models of 7B or more use QLoRA.
 
 ### Prompt
 
@@ -426,13 +490,45 @@ QUESTIONS:
 
 In the 3-shot setting, the three demonstrations (the training claim spans `clever_002_c3`, `clever_016_c7` and `clever_141_c1_s1`, with two, three and one reference questions) come after the instruction, under `Exemplos:`, in the same format and separated by `---`, and `===` separates them from the input. In zero-shot and 3-shot, decoder-only models with a chat template receive the prompt as a user turn.
 
+### Code
+
+The code of the baselines is in [`generative_baselines/`](generative_baselines):
+
+| Path | Content |
+|---|---|
+| `src/prepare_data.py` | Training and test claim spans of the split, nested silver subsets and the training file of each supervision configuration |
+| `src/run_prompting.py` | Zero-shot and 3-shot generation for the test claim spans |
+| `src/finetune.py` | Fine-tuning on one supervision configuration and generation for the test claim spans |
+| `src/metrics.py` | H-BERT, Cov-BERT, H-ROUGE-L, H-METEOR, CountErr and Q/Ex. |
+| `src/prompts.py` | The prompt |
+| `configs/models_encdec.yaml`, `configs/models_decoder.yaml` | The 14 models, with the adaptation used in fine-tuning |
+| `configs/fine_tuning.yaml` | Learning rate of each adaptation, LoRA settings, supervision configurations and number of epochs of each model in each configuration |
+| `split/clever_split_ids_seed0.json` | The training and test claim spans (see [Dataset Split](#dataset-split)) |
+
+The code runs on the full dataset. The context of each claim span is taken from the article bodies, without headline, dateline and sign-off (`clean_files/` in the full dataset), and the configurations with silver supervision also need the ClaimPT data files with the synthetic questions in each claim span (one record per annotation; see [Synthetic Questions](#synthetic-questions)) and the ClaimPT articles. The experiments ran on NVIDIA A100 GPUs with 80 GB.
+
+```bash
+cd generative_baselines
+pip install -r requirements.txt
+python -c "import nltk; nltk.download('wordnet'); nltk.download('omw-2.0')"
+
+python src/prepare_data.py --clever <CLEVER>/clever.json --clever_articles <CLEVER>/clean_files \
+    --claimpt <ClaimPT silver files> --claimpt_articles <ClaimPT articles>
+python src/run_prompting.py --config configs/models_decoder.yaml --regime zero_shot --bf16
+python src/run_prompting.py --config configs/models_decoder.yaml --regime few_shot --bf16
+python src/finetune.py --config configs/models_decoder.yaml --configuration gold91_silver1073
+python src/metrics.py --predictions_dir outputs/predictions --metrics_dir outputs/metrics
+```
+
+`--config configs/models_encdec.yaml` runs the encoder-decoder models, `--only` selects models by their short name (e.g., `--only amalia_9b`), and `--configuration` is one of `gold91`, `gold91_silver266`, `gold91_silver535`, `gold91_silver802`, `gold91_silver1073` and `silver1073`.
+
 ### Evaluation
 
-The models are evaluated on the 100 test claim spans (216 reference questions, 2.16 per claim span). Question sets are unordered and may differ in size, so generated and reference questions are aligned one-to-one with the Hungarian algorithm. **H-BERT** is the Hungarian BERTScore-F1: the sum of the similarities of the matched pairs is divided by the size of the larger set, so that both missing and superfluous questions lower the score. Hungarian ROUGE-L and METEOR, a BERTScore-based coverage, the cardinality error and the number of generated questions per claim span are also computed. All metrics are macro-averaged over claim spans, and the scores below are reported ×100.
+The models are evaluated on the 100 test claim spans (216 reference questions, 2.16 per claim span). Question sets are unordered and may differ in size, so generated and reference questions are aligned one-to-one with the Hungarian algorithm. **H-BERT** is the Hungarian BERTScore-F1: the sum of the similarities of the matched pairs is divided by the size of the larger set, so that both missing and superfluous questions lower the score. Hungarian ROUGE-L (**H-ROUGE-L**), Hungarian METEOR (**H-METEOR**), a BERTScore-based coverage (**Cov-BERT**), the cardinality error (**CountErr**) and the average number of generated questions per claim span (**Q/Ex.**) are also computed. All metrics are macro-averaged over claim spans, and H-BERT, Cov-BERT, H-ROUGE-L and H-METEOR are reported ×100.
 
 ### Results
 
-H-BERT on the 100 test claim spans under the six supervision configurations, with the best value of each row in bold:
+H-BERT on the CLEVER test set under the six supervision configurations.
 
 | **Model** | **Gold91** | **Gold91+Silver266** | **Gold91+Silver535** | **Gold91+Silver802** | **Gold91+Silver1073** | **Silver1073** |
 |------------|------|------|------|------|------|------|
@@ -452,56 +548,62 @@ H-BERT on the 100 test claim spans under the six supervision configurations, wit
 | GlórIA-1.3B | 59.61 | 71.64 | 72.02 | 72.16 | 74.12 | **74.36** |
 | **Mean** | 65.00 | 71.15 | 71.80 | 72.22 | 72.90 | **73.77** |
 
-H-BERT in the zero-shot, 3-shot and fine-tuning settings, with the fine-tuned models in the main supervision configuration (Gold91+Silver1073) and the best value of each setting in bold:
+Zero-shot results on the CLEVER test set. Reported values are macro-averaged over claim spans. Enc.-Dec. denotes encoder-decoder and Dec.-only denotes decoder-only.
 
-| **Model** | **Architecture** | **Language** | **Zero-shot** | **3-shot** | **Fine-tuned** |
-|------------|------|------|------|------|------|
-| PTT5 Large | Enc.-Dec. | PT-BR | 43.22 | 43.22 | 63.94 |
-| PTT5-v2 Large | Enc.-Dec. | PT (general) | 46.78 | 52.46 | 71.81 |
-| PTT5-v2 3B | Enc.-Dec. | PT (general) | 52.39 | 48.60 | 73.64 |
-| mT0 Large | Enc.-Dec. | Multilingual | 44.64 | 44.55 | 65.42 |
-| mT5 XL | Enc.-Dec. | Multilingual | 41.01 | 41.34 | 69.24 |
-| mT0 XXL | Enc.-Dec. | Multilingual | 37.35 | 45.53 | 73.58 |
-| Tucano-1b1-Instruct | Dec.-only | PT-BR | 40.11 | 32.63 | 75.06 |
-| Bode-7B-Alpaca | Dec.-only | PT-BR | 55.32 | 56.74 | 75.63 |
-| Llama 3.2-1B-Instruct | Dec.-only | Multilingual | 50.64 | 34.23 | 75.14 |
-| Llama 3.1-8B-Instruct | Dec.-only | Multilingual | 50.24 | 48.65 | 75.81 |
-| Mistral NeMo-12B-Instruct | Dec.-only | Multilingual | **75.52** | **75.88** | 75.11 |
-| Gervásio-8B PT-PT | Dec.-only | PT-PT | 43.50 | 50.10 | 75.78 |
-| AMALIA-9B-0626-DPO | Dec.-only | PT-PT | 70.25 | 72.13 | **76.31** |
-| GlórIA-1.3B | Dec.-only | PT-PT | 44.13 | 40.28 | 74.12 |
+| **Model** | **Architecture** | **Language** | **H-BERT** ↑ | **Cov-BERT** ↑ | **H-ROUGE-L** ↑ | **H-METEOR** ↑ | **CountErr** ↓ | **Q/Ex.** (Ref.=2.16) |
+|------------|------|------|------|------|------|------|------|------|
+| PTT5 Large | Enc.-Dec. | PT-BR | 43.22 | 82.10 | 3.20 | 6.18 | 1.16 | 1.00 |
+| PTT5-v2 Large | Enc.-Dec. | PT (general) | 46.78 | 84.49 | 7.57 | 9.97 | 1.30 | 1.88 |
+| PTT5-v2 3B | Enc.-Dec. | PT (general) | 52.39 | 84.65 | 9.95 | 12.27 | 0.92 | 1.34 |
+| mT0 Large | Enc.-Dec. | Multilingual | 44.64 | 84.62 | 5.81 | 3.10 | 1.16 | 1.00 |
+| mT5 XL | Enc.-Dec. | Multilingual | 41.01 | 77.88 | 3.22 | 6.11 | 1.16 | 1.00 |
+| mT0 XXL | Enc.-Dec. | Multilingual | 37.35 | 72.57 | 2.10 | 2.30 | 1.21 | 1.01 |
+| Tucano-1b1-Instruct | Dec.-only | PT-BR | 40.11 | 86.30 | 7.16 | 7.59 | 3.63 | 5.39 |
+| Bode-7B-Alpaca | Dec.-only | PT-BR | 55.32 | 89.26 | 14.85 | 13.81 | 1.94 | 3.68 |
+| Llama 3.2-1B-Instruct | Dec.-only | Multilingual | 50.64 | 89.45 | 14.73 | 15.15 | 2.32 | 4.30 |
+| Llama 3.1-8B-Instruct | Dec.-only | Multilingual | 50.24 | 90.57 | 17.62 | 19.22 | 2.03 | 4.17 |
+| Mistral NeMo-12B-Instruct | Dec.-only | Multilingual | **75.52** | **90.74** | **26.71** | **28.64** | **0.45** | 2.03 |
+| Gervásio-8B PT-PT | Dec.-only | PT-PT | 43.50 | **90.74** | 16.05 | 16.68 | 2.72 | 4.84 |
+| AMALIA-9B-0626-DPO | Dec.-only | PT-PT | 70.25 | 89.72 | 22.20 | 27.36 | 0.72 | 2.50 |
+| GlórIA-1.3B | Dec.-only | PT-PT | 44.13 | 76.60 | 7.68 | 9.17 | 1.48 | 2.16 |
 
-### Code
+Few-shot results on the CLEVER test set in the 3-shot setting. Reported values are macro-averaged over claim spans. Enc.-Dec. denotes encoder-decoder and Dec.-only denotes decoder-only.
 
-The code of the baselines is in [`generative_baselines/`](generative_baselines):
+| **Model** | **Architecture** | **Language** | **H-BERT** ↑ | **Cov-BERT** ↑ | **H-ROUGE-L** ↑ | **H-METEOR** ↑ | **CountErr** ↓ | **Q/Ex.** (Ref.=2.16) |
+|------------|------|------|------|------|------|------|------|------|
+| PTT5 Large | Enc.-Dec. | PT-BR | 43.22 | 82.10 | 3.20 | 6.18 | 1.16 | 1.00 |
+| PTT5-v2 Large | Enc.-Dec. | PT (general) | 52.46 | 84.53 | 5.96 | 6.62 | 1.10 | 2.00 |
+| PTT5-v2 3B | Enc.-Dec. | PT (general) | 48.60 | 82.18 | 5.75 | 4.63 | 1.23 | 2.13 |
+| mT0 Large | Enc.-Dec. | Multilingual | 44.55 | 84.58 | 3.92 | 2.55 | 1.16 | 1.00 |
+| mT5 XL | Enc.-Dec. | Multilingual | 41.34 | 79.46 | 1.65 | 2.13 | 1.62 | 1.50 |
+| mT0 XXL | Enc.-Dec. | Multilingual | 45.53 | 86.37 | 6.91 | 4.96 | 1.16 | 1.00 |
+| Tucano-1b1-Instruct | Dec.-only | PT-BR | 32.63 | 88.70 | 9.38 | 9.63 | 3.90 | 6.04 |
+| Bode-7B-Alpaca | Dec.-only | PT-BR | 56.74 | 90.71 | 21.46 | 22.35 | 1.43 | 3.15 |
+| Llama 3.2-1B-Instruct | Dec.-only | Multilingual | 34.23 | 88.52 | 8.06 | 8.05 | 3.79 | 5.51 |
+| Llama 3.1-8B-Instruct | Dec.-only | Multilingual | 48.65 | 90.92 | 19.99 | 21.56 | 2.78 | 4.84 |
+| Mistral NeMo-12B-Instruct | Dec.-only | Multilingual | **75.88** | 91.50 | **31.85** | **35.24** | **0.46** | 1.98 |
+| Gervásio-8B PT-PT | Dec.-only | PT-PT | 50.10 | **91.83** | 21.79 | 23.43 | 2.53 | 4.57 |
+| AMALIA-9B-0626-DPO | Dec.-only | PT-PT | 72.13 | 90.73 | 28.00 | 32.55 | 0.54 | 1.80 |
+| GlórIA-1.3B | Dec.-only | PT-PT | 40.28 | 77.05 | 3.32 | 2.02 | 1.99 | 3.09 |
 
-| Path | Content |
-|---|---|
-| `src/prepare_data.py` | Training and test claim spans of the split, nested silver subsets and the training file of each supervision configuration |
-| `src/run_prompting.py` | Zero-shot and 3-shot generation for the test claim spans |
-| `src/finetune.py` | Fine-tuning on one supervision configuration and generation for the test claim spans |
-| `src/metrics.py` | H-BERT, Cov-BERT, H-ROUGE-L, H-METEOR, CountErr and Q/Ex. |
-| `src/prompts.py` | The prompt |
-| `configs/models_encdec.yaml`, `configs/models_decoder.yaml` | The 14 models, with the adaptation used in fine-tuning |
-| `configs/fine_tuning.yaml` | Learning rate of each adaptation, LoRA settings, supervision configurations and number of epochs of each model in each configuration |
-| `split/clever_split_ids_seed0.json` | The training and test claim spans (see [Dataset Split](#dataset-split)) |
+Comparison of the models in the main training configuration, Gold91+Silver1073, on the CLEVER test set. Reported values are macro-averaged over claim spans. Enc.-Dec. denotes encoder-decoder and Dec.-only denotes decoder-only.
 
-The code runs on the full dataset. The context of each claim span is taken from the article bodies, without headline, dateline and sign-off (`clean_files/` in the full dataset), and the configurations with silver supervision also need the ClaimPT claim spans with their synthetic questions and the ClaimPT articles. The experiments ran on NVIDIA A100 GPUs with 80 GB.
-
-```bash
-cd generative_baselines
-pip install -r requirements.txt
-python -c "import nltk; nltk.download('wordnet'); nltk.download('omw-2.0')"
-
-python src/prepare_data.py --clever <CLEVER>/clever.json --clever_articles <CLEVER>/clean_files \
-    --claimpt <ClaimPT silver files> --claimpt_articles <ClaimPT articles>
-python src/run_prompting.py --config configs/models_decoder.yaml --regime zero_shot --bf16
-python src/run_prompting.py --config configs/models_decoder.yaml --regime few_shot --bf16
-python src/finetune.py --config configs/models_decoder.yaml --configuration gold91_silver1073
-python src/metrics.py --predictions_dir outputs/predictions --metrics_dir outputs/metrics
-```
-
-`--config configs/models_encdec.yaml` runs the encoder-decoder models, `--only` selects models by their short name (e.g., `--only amalia_9b`), and `--configuration` is one of `gold91`, `gold91_silver266`, `gold91_silver535`, `gold91_silver802`, `gold91_silver1073` and `silver1073`.
+| **Model** | **Architecture** | **Language** | **H-BERT** ↑ | **Cov-BERT** ↑ | **H-ROUGE-L** ↑ | **H-METEOR** ↑ | **CountErr** ↓ | **Q/Ex.** (Ref.=2.16) |
+|------------|------|------|------|------|------|------|------|------|
+| PTT5 Large | Enc.-Dec. | PT-BR | 63.94 | 91.07 | 28.17 | 30.59 | 0.75 | 1.61 |
+| PTT5-v2 Large | Enc.-Dec. | PT (general) | 71.81 | **91.42** | 30.69 | 32.67 | 0.57 | 2.01 |
+| PTT5-v2 3B | Enc.-Dec. | PT (general) | 73.64 | 91.14 | 29.47 | 33.92 | 0.51 | 1.89 |
+| mT0 Large | Enc.-Dec. | Multilingual | 65.42 | 91.13 | 28.15 | 30.28 | 0.72 | 1.64 |
+| mT5 XL | Enc.-Dec. | Multilingual | 69.24 | 90.06 | 28.89 | 29.08 | 0.74 | 2.60 |
+| mT0 XXL | Enc.-Dec. | Multilingual | 73.58 | 91.38 | 30.16 | 33.86 | 0.51 | 1.91 |
+| Tucano-1b1-Instruct | Dec.-only | PT-BR | 75.06 | 90.58 | 27.35 | 30.13 | 0.48 | 2.04 |
+| Bode-7B-Alpaca | Dec.-only | PT-BR | 75.63 | 91.24 | 30.62 | 35.08 | 0.47 | 2.07 |
+| Llama 3.2-1B-Instruct | Dec.-only | Multilingual | 75.14 | 91.10 | 29.47 | 34.12 | 0.48 | 2.04 |
+| Llama 3.1-8B-Instruct | Dec.-only | Multilingual | 75.81 | 90.73 | 29.37 | 32.60 | 0.46 | 2.10 |
+| Mistral NeMo-12B-Instruct | Dec.-only | Multilingual | 75.11 | 91.34 | 30.90 | 35.47 | 0.48 | 2.02 |
+| Gervásio-8B PT-PT | Dec.-only | PT-PT | 75.78 | 91.29 | **31.09** | **36.14** | 0.47 | 2.05 |
+| AMALIA-9B-0626-DPO | Dec.-only | PT-PT | **76.31** | 91.22 | 31.06 | 35.47 | **0.44** | 2.02 |
+| GlórIA-1.3B | Dec.-only | PT-PT | 74.12 | 90.29 | 25.71 | 28.34 | 0.49 | 2.05 |
 
 ---
 

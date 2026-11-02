@@ -1,0 +1,685 @@
+[
+  {
+    "document": "news_0008.txt",
+    "news_article_topic": "science and environment",
+    "publication_time": "04 dez 2023",
+    "items": [
+      {
+        "claim": true,
+        "begin_character": 501,
+        "end_character": 685,
+        "text_segment": "foi convidado para aderir não pelo lado monárquico, no qual, aliás, não insistiam muito, mas por se empenhar, acima de tudo, na defesa do ambiente e na preservação da qualidade de vida",
+        "claim_topic": "politics",
+        "claim_span": {
+          "text": "foi convidado para aderir não pelo lado monárquico, no qual, aliás, não insistiam muito, mas por se empenhar, acima de tudo, na defesa do ambiente e na preservação da qualidade de vida",
+          "begin": 501,
+          "end": 685,
+          "questions": [
+            "Qual foi o motivo da inclusão do Partido Popular Monárquico (PPM) na Aliança Democrática (AD) em 1980?",
+            "O PPM foi convidado a integrar a Aliança Democrática em 1980 devido ao seu empenho na defesa do ambiente e da qualidade de vida, e não pela sua vertente monárquica?"
+          ]
+        },
+        "claim_object": {
+          "text": "por se empenhar, acima de tudo, na defesa do ambiente",
+          "begin": 594,
+          "end": 647
+        },
+        "claimer": {
+          "text": "Pinto Balsemão",
+          "begin": 438,
+          "end": 452
+        },
+        "time": "",
+        "id": "news_0008_c1"
+      }
+    ]
+  },
+  {
+    "document": "news_0035.txt",
+    "news_article_topic": "international",
+    "publication_time": "04 dez 2023",
+    "items": [
+      {
+        "claim": true,
+        "begin_character": 1071,
+        "end_character": 1285,
+        "text_segment": "Infelizmente, a rejeição da existência de Israel é um elemento comum entre ambas as fações, por isso não vou cometer o erro de colocar a Autoridade Palestiniana no comando de Gaza, porque teríamos o mesmo resultado",
+        "claim_topic": "international",
+        "claim_span": {
+          "text": "a rejeição da existência de Israel é um elemento comum entre ambas as fações",
+          "begin": 1085,
+          "end": 1161,
+          "questions": [
+            "A Autoridade Palestiniana reconhece ou rejeita oficialmente a existência do Estado de Israel, até dezembro de 2023?",
+            "O Hamas mantém a rejeição da existência do Estado de Israel na sua carta fundadora ou em posições oficiais até dezembro de 2023?"
+          ]
+        },
+        "claim_object": {
+          "text": "rejeição da existência de Israel",
+          "begin": 1087,
+          "end": 1119
+        },
+        "claimer": [
+          {
+            "text": "o primeiro-ministro israelita",
+            "begin": 1297,
+            "end": 1326
+          },
+          {
+            "text": "Netanyahu",
+            "begin": 851,
+            "end": 860
+          }
+        ],
+        "time": {
+          "text": "No domingo",
+          "begin": 839,
+          "end": 849
+        },
+        "id": "news_0035_c2"
+      }
+    ]
+  },
+  {
+    "document": "news_0050.txt",
+    "news_article_topic": "international",
+    "publication_time": "04 dez 2023",
+    "items": [
+      {
+        "claim": true,
+        "begin_character": 1196,
+        "end_character": 1325,
+        "text_segment": "Setenta e cinco anos depois, os judeus ainda são alvo de ataques e ainda sentem a violência do antissemitismo e o ódio aos judeus",
+        "claim_topic": "international",
+        "claim_span": {
+          "text": "os judeus ainda são alvo de ataques e ainda sentem a violência do antissemitismo e o ódio aos judeus",
+          "begin": 1225,
+          "end": 1325,
+          "questions": [
+            "Registou-se um aumento global de ataques e incidentes antissemitas após os acontecimentos de 7 de outubro de 2023?",
+            "Quais foram os dados reportados sobre a violência e o ódio contra a comunidade judaica a nível mundial no final de 2023?"
+          ]
+        },
+        "claim_object": {
+          "text": "antissemitismo",
+          "begin": 1291,
+          "end": 1305
+        },
+        "claimer": [
+          {
+            "text": "Yeela Cytrin",
+            "begin": 1334,
+            "end": 1346
+          },
+          {
+            "text": "Yeela Cytrin, conselheira jurídica da missão israelita em Genebra",
+            "begin": 442,
+            "end": 507
+          }
+        ],
+        "time": {
+          "text": "hoje",
+          "begin": 156,
+          "end": 160
+        },
+        "id": "news_0050_c2"
+      },
+      {
+        "claim": true,
+        "begin_character": 1364,
+        "end_character": 1455,
+        "text_segment": "O Hamas e os seus apoiantes encorajam a erradicação do povo judeu nas redes sociais há anos",
+        "claim_topic": "international",
+        "claim_span": {
+          "text": "O Hamas e os seus apoiantes encorajam a erradicação do povo judeu nas redes sociais há anos",
+          "begin": 1364,
+          "end": 1455,
+          "questions": [
+            "Existem relatórios ou análises que comprovem que o Hamas e os seus apoiantes promoveram a erradicação do povo judeu nas redes sociais nos anos anteriores a dezembro de 2023?",
+            "Que evidências existem de publicações do Hamas ou de apoiantes nas redes sociais a apelar à eliminação do povo judeu até 2023?"
+          ]
+        },
+        "claim_object": {
+          "text": "encorajam a erradicação do povo judeu nas redes sociais",
+          "begin": 1392,
+          "end": 1447
+        },
+        "claimer": [
+          {
+            "text": "Yeela Cytrin",
+            "begin": 1334,
+            "end": 1346
+          },
+          {
+            "text": "Yeela Cytrin, conselheira jurídica da missão israelita em Genebra",
+            "begin": 442,
+            "end": 507
+          }
+        ],
+        "time": {
+          "text": "hoje",
+          "begin": 156,
+          "end": 160
+        },
+        "id": "news_0050_c3"
+      },
+      {
+        "claim": true,
+        "begin_character": 1459,
+        "end_character": 1581,
+        "text_segment": "Mesmo antes de os corpos das vítimas de 07 de outubro arrefecerem, o antissemitismo explodiu tanto ‘offline’ como ‘online’",
+        "claim_topic": "international",
+        "claim_span": {
+          "text": "Mesmo antes de os corpos das vítimas de 07 de outubro arrefecerem, o antissemitismo explodiu tanto ‘offline’ como ‘online’",
+          "begin": 1459,
+          "end": 1581,
+          "questions": [
+            "Houve um aumento significativo de incidentes antissemitas a nível global, em termos físicos ou presenciais (offline), logo após os ataques de 7 de outubro de 2023?",
+            "Registou-se um crescimento acentuado de discursos de ódio e conteúdos antissemitas nas plataformas online e redes sociais após o 7 de outubro de 2023?"
+          ]
+        },
+        "claim_object": {
+          "text": "antissemitismo",
+          "begin": 1528,
+          "end": 1542
+        },
+        "claimer": [
+          {
+            "text": "Yeela Cytrin",
+            "begin": 1334,
+            "end": 1346
+          },
+          {
+            "text": "Yeela Cytrin, conselheira jurídica da missão israelita em Genebra",
+            "begin": 442,
+            "end": 507
+          }
+        ],
+        "time": {
+          "text": "hoje",
+          "begin": 156,
+          "end": 160
+        },
+        "id": "news_0050_c4"
+      },
+      {
+        "claim": true,
+        "begin_character": 1995,
+        "end_character": 2156,
+        "text_segment": "Nas últimas oito semanas, depois de transmitir publicamente apelos genocidas, Israel começou a lançar toneladas de explosivos em Gaza com enorme poder destrutivo",
+        "claim_topic": "international",
+        "claim_span": {
+          "text": "Nas últimas oito semanas, depois de transmitir publicamente apelos genocidas, Israel começou a lançar toneladas de explosivos em Gaza com enorme poder destrutivo",
+          "begin": 1995,
+          "end": 2156,
+          "questions": [
+            "Israel lançou toneladas de explosivos de elevado poder destrutivo na Faixa de Gaza entre outubro e dezembro de 2023?",
+            "Existem registos de declarações públicas de governantes ou oficiais israelitas que apelem ao genocídio ou à destruição de Gaza entre outubro e dezembro de 2023?"
+          ]
+        },
+        "claim_object": {
+          "text": "toneladas de explosivos",
+          "begin": 2097,
+          "end": 2120
+        },
+        "claimer": [
+          {
+            "text": "A diplomata palestiniana Dima Asfour",
+            "begin": 562,
+            "end": 598
+          },
+          {
+            "text": "a representante",
+            "begin": 2168,
+            "end": 2183
+          },
+          {
+            "text": "Dima Asour",
+            "begin": 2185,
+            "end": 2195
+          }
+        ],
+        "time": {
+          "text": "hoje",
+          "begin": 156,
+          "end": 160
+        },
+        "id": "news_0050_c6"
+      }
+    ]
+  },
+  {
+    "document": "news_0060.txt",
+    "news_article_topic": "politics",
+    "publication_time": "04 dez 2023",
+    "items": [
+      {
+        "claim": true,
+        "begin_character": 302,
+        "end_character": 487,
+        "text_segment": "A maioria absoluta fechou hospitais e urgências, deixou Portugal numa crise de habitação e foi responsável pelo empobrecimento de uma vasta camada da população que perdeu poder de conta",
+        "claim_topic": "politics",
+        "claim_span": {
+          "text": "A maioria absoluta fechou hospitais e urgências, deixou Portugal numa crise de habitação e foi responsável pelo empobrecimento de uma vasta camada da população que perdeu poder de conta",
+          "begin": 302,
+          "end": 487,
+          "questions": [
+            "Durante o governo de maioria absoluta do PS, entre 2022 e 2023, foram encerrados hospitais ou serviços de urgência em Portugal?",
+            "Houve um agravamento da crise de habitação em Portugal durante o período da maioria absoluta do PS até dezembro de 2023?",
+            "A população portuguesa registou uma perda de poder de compra e empobrecimento durante a maioria absoluta do PS entre 2022 e 2023?"
+          ]
+        },
+        "claim_object": {
+          "text": "maioria absoluta",
+          "begin": 304,
+          "end": 320
+        },
+        "claimer": [
+          {
+            "text": "Mariana Mortágua",
+            "begin": 497,
+            "end": 513
+          },
+          {
+            "text": "A coordenadora do Bloco de Esquerda, Mariana Mortágua",
+            "begin": 121,
+            "end": 174
+          }
+        ],
+        "time": {
+          "text": "hoje",
+          "begin": 182,
+          "end": 186
+        },
+        "id": "news_0060_c1"
+      },
+      {
+        "claim": true,
+        "begin_character": 2578,
+        "end_character": 2711,
+        "text_segment": "Estamos na estação da universidade que é o fim de linha do metro sul do Tejo, deixando milhares de pessoas sem transporte alternativo",
+        "claim_topic": "society",
+        "claim_span": {
+          "text": "Estamos na estação da universidade que é o fim de linha do metro sul do Tejo, deixando milhares de pessoas sem transporte alternativo",
+          "begin": 2578,
+          "end": 2711,
+          "questions": [
+            "Quais eram as alternativas de transporte público disponíveis na estação da Universidade do Metro Sul do Tejo, no Monte da Caparica, em dezembro de 2023?",
+            "A estação da Universidade do Metro Sul do Tejo deixava milhares de utentes sem transportes alternativos em dezembro de 2023?"
+          ]
+        },
+        "claim_object": {
+          "text": "deixando milhares de pessoas sem transporte alternativo",
+          "begin": 2656,
+          "end": 2711
+        },
+        "claimer": {
+          "text": "Mariana Mortágua",
+          "begin": 497,
+          "end": 513
+        },
+        "time": {
+          "text": "hoje",
+          "begin": 182,
+          "end": 186
+        },
+        "id": "news_0060_c5"
+      },
+      {
+        "claim": true,
+        "begin_character": 2713,
+        "end_character": 2824,
+        "text_segment": "O Governo tinha prometido estender o metro de superfície até Costa da Caparica e essa promessa não foi cumprida",
+        "claim_topic": "politics",
+        "claim_span": [
+          {
+            "text": "O Governo tinha prometido estender o metro de superfície até Costa da Caparica",
+            "begin": 2713,
+            "end": 2791,
+            "questions": [
+              "O Governo português prometeu a extensão do Metro Sul do Tejo até à Costa da Caparica antes de dezembro de 2023?",
+              "Existe algum plano oficial ou anúncio do Governo para estender o metro de superfície à Costa da Caparica até 2023?"
+            ]
+          },
+          {
+            "text": "essa promessa não foi cumprida",
+            "begin": 2794,
+            "end": 2824,
+            "questions": [
+              "O Governo português assumiu o compromisso de estender o Metro Sul do Tejo até à Costa da Caparica?",
+              "A extensão do Metro Sul do Tejo até à Costa da Caparica foi concluída ou estava em funcionamento até dezembro de 2023?"
+            ]
+          }
+        ],
+        "claim_object": [
+          {
+            "text": "tinha prometido",
+            "begin": 2723,
+            "end": 2738
+          },
+          {
+            "text": "não foi cumprida",
+            "begin": 2808,
+            "end": 2824
+          }
+        ],
+        "claimer": {
+          "text": "Mariana Mortágua",
+          "begin": 497,
+          "end": 513
+        },
+        "time": {
+          "text": "hoje",
+          "begin": 182,
+          "end": 186
+        },
+        "id": "news_0060_c6"
+      }
+    ]
+  },
+  {
+    "document": "news_0074.txt",
+    "news_article_topic": "politics",
+    "publication_time": "04 dez 2023",
+    "items": [
+      {
+        "claim": true,
+        "begin_character": 3572,
+        "end_character": 3688,
+        "text_segment": "São independentes, são de outros sindicatos, que decidiram estar nesse painel e que nós acolhemos com todo o carinho",
+        "claim_topic": "politics",
+        "claim_span": {
+          "text": "São independentes, são de outros sindicatos, que decidiram estar nesse painel",
+          "begin": 3572,
+          "end": 3649,
+          "questions": [
+            "Os sindicatos que participaram no painel sobre a saúde nas jornadas parlamentares do Chega, em dezembro de 2023, têm alguma ligação ao partido ou ao sindicato Solidariedade?",
+            "O Sindicato Independente dos Técnicos Auxiliares de Saúde, o Sindicato dos Profissionais Administrativos da Saúde, o Sindicato dos Técnicos de Emergência Médica Pré-Hospitalar e o Sindicato dos Médicos Dentistas são independentes do Chega?"
+          ]
+        },
+        "claim_object": {
+          "text": "São independentes, são de outros sindicatos",
+          "begin": 3572,
+          "end": 3615
+        },
+        "claimer": [
+          {
+            "text": "o líder parlamentar do Chega",
+            "begin": 346,
+            "end": 374
+          },
+          {
+            "text": "Pedro Pinto",
+            "begin": 3324,
+            "end": 3335
+          }
+        ],
+        "time": "",
+        "id": "news_0074_c3"
+      }
+    ]
+  },
+  {
+    "document": "news_0087.txt",
+    "news_article_topic": "science and environment",
+    "publication_time": "04 dez 2023",
+    "items": [
+      {
+        "claim": true,
+        "begin_character": 2803,
+        "end_character": 3020,
+        "text_segment": "E é bom que compreendam que não há, por isso, muitas vezes, nas políticas regionais, uma liberdade de fazer como se quer ou de acordo com o que se pede, mas sim de acordo com regras preexistentes no quadro comunitário",
+        "claim_topic": "politics",
+        "claim_span": {
+          "text": "não há, por isso, muitas vezes, nas políticas regionais, uma liberdade de fazer como se quer ou de acordo com o que se pede, mas sim de acordo com regras preexistentes no quadro comunitário",
+          "begin": 2831,
+          "end": 3020,
+          "questions": [
+            "As políticas regionais dos Açores para as pescas e economia azul estão subordinadas às regras do quadro comunitário da União Europeia?",
+            "Qual é o grau de autonomia do Governo Regional dos Açores para legislar sobre pescas e sustentabilidade marinha face às normas europeias em 2023?"
+          ]
+        },
+        "claim_object": {
+          "text": "liberdade de fazer como se quer",
+          "begin": 2892,
+          "end": 2923
+        },
+        "claimer": [
+          {
+            "text": "o presidente do Governo dos Açores",
+            "begin": 1586,
+            "end": 1620
+          },
+          {
+            "text": "Bolieiro",
+            "begin": 2536,
+            "end": 2544
+          }
+        ],
+        "time": {
+          "text": "hoje",
+          "begin": 192,
+          "end": 196
+        },
+        "id": "news_0087_c7"
+      }
+    ]
+  },
+  {
+    "document": "news_0100.txt",
+    "news_article_topic": "health",
+    "publication_time": "04 dez 2023",
+    "items": [
+      {
+        "claim": true,
+        "begin_character": 808,
+        "end_character": 930,
+        "text_segment": "No passado, muitos médicos trabalhavam como especialistas aguardando meses ou mesmo anos para que esses concursos abrissem",
+        "claim_topic": "health",
+        "claim_span": {
+          "text": "No passado, muitos médicos trabalhavam como especialistas aguardando meses ou mesmo anos para que esses concursos abrissem",
+          "begin": 808,
+          "end": 930,
+          "questions": [
+            "Antes de dezembro de 2023, os concursos para contratação de médicos recém-especialistas no SNS demoravam meses ou anos a abrir?",
+            "Antes de 2023, os médicos recém-especialistas trabalhavam no SNS enquanto aguardavam a abertura de concursos de colocação?"
+          ]
+        },
+        "claim_object": {
+          "text": "aguardando meses ou mesmo anos",
+          "begin": 866,
+          "end": 896
+        },
+        "claimer": [
+          {
+            "text": "Jorge Roque da Cunha",
+            "begin": 1363,
+            "end": 1383
+          },
+          {
+            "text": "o secretário-geral do SIM, Jorge Roque da Cunha",
+            "begin": 640,
+            "end": 687
+          },
+          {
+            "text": "O dirigente sindical",
+            "begin": 2821,
+            "end": 2841
+          }
+        ],
+        "time": {
+          "text": "hoje",
+          "begin": 172,
+          "end": 176
+        },
+        "id": "news_0100_c1"
+      },
+      {
+        "claim": true,
+        "begin_character": 1692,
+        "end_character": 1813,
+        "text_segment": "Em termos hospitalares, há dois anos foi cerca de 40% e no ano passado foi cerca de 50% [as vagas que ficaram por ocupar]",
+        "claim_topic": "health",
+        "claim_span": {
+          "text": "há dois anos foi cerca de 40% e no ano passado foi cerca de 50% [as vagas que ficaram por ocupar]",
+          "begin": 1716,
+          "end": 1813,
+          "questions": [
+            "Qual foi a percentagem de vagas para médicos especialistas em hospitais do SNS que ficou por ocupar em 2021?",
+            "Qual foi a percentagem de vagas para médicos especialistas em hospitais do SNS que ficou por ocupar em 2022?"
+          ]
+        },
+        "claim_object": {
+          "text": "as vagas que ficaram por ocupar",
+          "begin": 1781,
+          "end": 1812
+        },
+        "claimer": [
+          {
+            "text": "Jorge Roque da Cunha",
+            "begin": 1363,
+            "end": 1383
+          },
+          {
+            "text": "o secretário-geral do SIM, Jorge Roque da Cunha",
+            "begin": 640,
+            "end": 687
+          },
+          {
+            "text": "O dirigente sindical",
+            "begin": 2821,
+            "end": 2841
+          }
+        ],
+        "time": {
+          "text": "hoje",
+          "begin": 172,
+          "end": 176
+        },
+        "id": "news_0100_c3"
+      },
+      {
+        "claim": true,
+        "begin_character": 3094,
+        "end_character": 3309,
+        "text_segment": "O ano passado foi o ano em que mais médicos rescindiram e, por isso, é positivo que o concurso seja célere (…), mas a questão de fundo mantém-se e infelizmente nós prevemos que muitas dessas vagas ficarão por ocupar",
+        "claim_topic": "health",
+        "claim_span": {
+          "text": "O ano passado foi o ano em que mais médicos rescindiram",
+          "begin": 3094,
+          "end": 3149,
+          "questions": [
+            "O ano de 2022 registou o maior número de rescisões de contratos de médicos no SNS?",
+            "Qual foi o número de médicos que rescindiram contrato com o Serviço Nacional de Saúde em 2022?"
+          ]
+        },
+        "claim_object": {
+          "text": "mais médicos rescindiram",
+          "begin": 3125,
+          "end": 3149
+        },
+        "claimer": [
+          {
+            "text": "Jorge Roque da Cunha",
+            "begin": 1363,
+            "end": 1383
+          },
+          {
+            "text": "o secretário-geral do SIM, Jorge Roque da Cunha",
+            "begin": 640,
+            "end": 687
+          },
+          {
+            "text": "O dirigente sindical",
+            "begin": 2821,
+            "end": 2841
+          }
+        ],
+        "time": {
+          "text": "hoje",
+          "begin": 172,
+          "end": 176
+        },
+        "id": "news_0100_c7"
+      }
+    ]
+  },
+  {
+    "document": "news_0105.txt",
+    "news_article_topic": "society",
+    "publication_time": "04 dez 2023",
+    "items": [
+      {
+        "claim": true,
+        "begin_character": 737,
+        "end_character": 868,
+        "text_segment": "Os apoios à habitação são indispensáveis para os professores que, pelo salário que têm, não conseguem suportar o custo da habitação",
+        "claim_topic": "society",
+        "claim_span": {
+          "text": "Os apoios à habitação são indispensáveis para os professores que, pelo salário que têm, não conseguem suportar o custo da habitação",
+          "begin": 737,
+          "end": 868,
+          "questions": [
+            "Qual era a taxa de esforço média dos professores deslocados em Portugal para suportar os custos de habitação em 2023?",
+            "Os salários de início de carreira dos professores em Portugal permitiam suportar o custo médio de arrendamento nas grandes cidades em 2023?"
+          ]
+        },
+        "claim_object": {
+          "text": "suportar o custo da habitação",
+          "begin": 839,
+          "end": 868
+        },
+        "claimer": {
+          "text": "Mário Nogueira",
+          "begin": 879,
+          "end": 893
+        },
+        "time": {
+          "text": "hoje",
+          "begin": 170,
+          "end": 174
+        },
+        "id": "news_0105_c1"
+      },
+      {
+        "claim": true,
+        "begin_character": 2771,
+        "end_character": 2971,
+        "text_segment": "O único problema que tiveram para poderem ser dispensados tem a ver com o facto de não terem estado nestes últimos anos sempre a dar a mesma disciplina, coisa que a partir do próximo ano é indiferente",
+        "claim_topic": "society",
+        "claim_span": {
+          "text": "O único problema que tiveram para poderem ser dispensados tem a ver com o facto de não terem estado nestes últimos anos sempre a dar a mesma disciplina",
+          "begin": 2771,
+          "end": 2922,
+          "questions": [
+            "Em dezembro de 2023, a dispensa do período probatório de professores exigia que tivessem lecionado sempre a mesma disciplina nos anos anteriores?",
+            "Quais eram os requisitos legais para a dispensa do período probatório de docentes com anos de serviço em 2023?"
+          ]
+        },
+        "claim_object": {
+          "text": "não terem estado nestes últimos anos sempre a dar a mesma disciplina",
+          "begin": 2854,
+          "end": 2922
+        },
+        "claimer": [
+          {
+            "text": "secretário-geral da Fenprof, Mário Nogueira",
+            "begin": 528,
+            "end": 571
+          },
+          {
+            "text": "Mário Nogueira",
+            "begin": 879,
+            "end": 893
+          }
+        ],
+        "time": {
+          "text": "hoje",
+          "begin": 170,
+          "end": 174
+        },
+        "id": "news_0105_c2"
+      }
+    ]
+  }
+]

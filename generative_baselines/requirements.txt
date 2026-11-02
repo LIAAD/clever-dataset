@@ -1,0 +1,20 @@
+# Versions with which this code was tested (Python 3.12, CUDA 12.8). The experiments of the paper
+# ran with Python 3.11.5, PyTorch 2.10.0, Transformers 5.6.2, PEFT 0.19.1, Accelerate 1.13.0 and
+# bitsandbytes 0.49.2.
+torch==2.11.0  # CUDA 12.8 build (2.11.0+cu128)
+transformers==5.13.0
+tokenizers==0.22.2
+huggingface-hub==1.22.0
+safetensors==0.8.0
+peft==0.20.0
+accelerate==1.14.0  # used by the Trainer and by device_map
+bitsandbytes==0.50.1  # 4-bit NF4 loading (QLoRA and decoder-only inference)
+datasets==5.0.0
+sentencepiece==0.2.2  # T5/mT5 tokenizers
+protobuf==7.35.1  # SentencePiece tokenizer conversion
+bert-score==0.3.13
+rouge-score==0.1.2
+nltk==3.10.0
+scipy==1.18.0
+numpy==2.3.1
+PyYAML==6.0.3

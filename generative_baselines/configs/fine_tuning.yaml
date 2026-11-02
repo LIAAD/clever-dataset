@@ -1,0 +1,126 @@
+# Fine-tuning recipe of src/finetune.py. Each model trains for `epochs` epochs, while the linear
+# learning-rate schedule spans `scheduler_horizon` epochs, so training stops before the learning
+# rate reaches zero.
+
+effective_batch_size: 8
+warmup_ratio: 0.1
+
+learning_rate:
+  full_fine_tuning: 3.0e-5
+  lora: 1.0e-4
+  qlora: 1.0e-4
+
+lora:
+  r: 64
+  alpha: 16
+  dropout: 0.1
+
+# Supervision configurations: the 91 gold questions of the 40 training claim spans (gold) and
+# the nested subset of the 522 ClaimPT claim spans with silver questions (silver, in percent).
+configurations:
+  gold91:            {gold: true, silver: null}
+  gold91_silver266:  {gold: true, silver: 25}
+  gold91_silver535:  {gold: true, silver: 50}
+  gold91_silver802:  {gold: true, silver: 75}
+  gold91_silver1073: {gold: true, silver: 100}
+  silver1073:        {gold: false, silver: 100}
+
+epochs:
+  ptt5_large:
+    gold91:            {epochs: 1, scheduler_horizon: 20}
+    gold91_silver266:  {epochs: 16, scheduler_horizon: 20}
+    gold91_silver535:  {epochs: 19, scheduler_horizon: 20}
+    gold91_silver802:  {epochs: 7, scheduler_horizon: 20}
+    gold91_silver1073: {epochs: 15, scheduler_horizon: 20}
+    silver1073:        {epochs: 4, scheduler_horizon: 20}
+  mt0_large:
+    gold91:            {epochs: 16, scheduler_horizon: 20}
+    gold91_silver266:  {epochs: 8, scheduler_horizon: 20}
+    gold91_silver535:  {epochs: 4, scheduler_horizon: 20}
+    gold91_silver802:  {epochs: 3, scheduler_horizon: 20}
+    gold91_silver1073: {epochs: 9, scheduler_horizon: 20}
+    silver1073:        {epochs: 3, scheduler_horizon: 20}
+  ptt5v2_large:
+    gold91:            {epochs: 28, scheduler_horizon: 30}
+    gold91_silver266:  {epochs: 15, scheduler_horizon: 20}
+    gold91_silver535:  {epochs: 9, scheduler_horizon: 20}
+    gold91_silver802:  {epochs: 9, scheduler_horizon: 20}
+    gold91_silver1073: {epochs: 2, scheduler_horizon: 20}
+    silver1073:        {epochs: 6, scheduler_horizon: 20}
+  ptt5v2_3b:
+    gold91:            {epochs: 4, scheduler_horizon: 20}
+    gold91_silver266:  {epochs: 19, scheduler_horizon: 20}
+    gold91_silver535:  {epochs: 18, scheduler_horizon: 20}
+    gold91_silver802:  {epochs: 17, scheduler_horizon: 20}
+    gold91_silver1073: {epochs: 14, scheduler_horizon: 20}
+    silver1073:        {epochs: 18, scheduler_horizon: 20}
+  mt5_xl:
+    gold91:            {epochs: 18, scheduler_horizon: 20}
+    gold91_silver266:  {epochs: 4, scheduler_horizon: 20}
+    gold91_silver535:  {epochs: 16, scheduler_horizon: 20}
+    gold91_silver802:  {epochs: 11, scheduler_horizon: 20}
+    gold91_silver1073: {epochs: 2, scheduler_horizon: 20}
+    silver1073:        {epochs: 7, scheduler_horizon: 20}
+  mt0_xxl:
+    gold91:            {epochs: 29, scheduler_horizon: 30}
+    gold91_silver266:  {epochs: 9, scheduler_horizon: 20}
+    gold91_silver535:  {epochs: 13, scheduler_horizon: 20}
+    gold91_silver802:  {epochs: 12, scheduler_horizon: 20}
+    gold91_silver1073: {epochs: 7, scheduler_horizon: 20}
+    silver1073:        {epochs: 12, scheduler_horizon: 20}
+  tucano_1b1:
+    gold91:            {epochs: 13, scheduler_horizon: 20}
+    gold91_silver266:  {epochs: 8, scheduler_horizon: 20}
+    gold91_silver535:  {epochs: 9, scheduler_horizon: 20}
+    gold91_silver802:  {epochs: 15, scheduler_horizon: 20}
+    gold91_silver1073: {epochs: 7, scheduler_horizon: 20}
+    silver1073:        {epochs: 4, scheduler_horizon: 20}
+  llama32_1b:
+    gold91:            {epochs: 7, scheduler_horizon: 20}
+    gold91_silver266:  {epochs: 11, scheduler_horizon: 20}
+    gold91_silver535:  {epochs: 13, scheduler_horizon: 20}
+    gold91_silver802:  {epochs: 19, scheduler_horizon: 20}
+    gold91_silver1073: {epochs: 7, scheduler_horizon: 20}
+    silver1073:        {epochs: 16, scheduler_horizon: 20}
+  gloria_1b3:
+    gold91:            {epochs: 17, scheduler_horizon: 20}
+    gold91_silver266:  {epochs: 19, scheduler_horizon: 20}
+    gold91_silver535:  {epochs: 13, scheduler_horizon: 20}
+    gold91_silver802:  {epochs: 11, scheduler_horizon: 20}
+    gold91_silver1073: {epochs: 15, scheduler_horizon: 20}
+    silver1073:        {epochs: 9, scheduler_horizon: 20}
+  bode_7b:
+    gold91:            {epochs: 18, scheduler_horizon: 20}
+    gold91_silver266:  {epochs: 6, scheduler_horizon: 20}
+    gold91_silver535:  {epochs: 6, scheduler_horizon: 30}
+    gold91_silver802:  {epochs: 4, scheduler_horizon: 20}
+    gold91_silver1073: {epochs: 10, scheduler_horizon: 20}
+    silver1073:        {epochs: 2, scheduler_horizon: 20}
+  llama_8b:
+    gold91:            {epochs: 17, scheduler_horizon: 20}
+    gold91_silver266:  {epochs: 6, scheduler_horizon: 20}
+    gold91_silver535:  {epochs: 2, scheduler_horizon: 20}
+    gold91_silver802:  {epochs: 14, scheduler_horizon: 20}
+    gold91_silver1073: {epochs: 1, scheduler_horizon: 20}
+    silver1073:        {epochs: 1, scheduler_horizon: 20}
+  gervasio_8b:
+    gold91:            {epochs: 7, scheduler_horizon: 20}
+    gold91_silver266:  {epochs: 9, scheduler_horizon: 20}
+    gold91_silver535:  {epochs: 5, scheduler_horizon: 20}
+    gold91_silver802:  {epochs: 2, scheduler_horizon: 20}
+    gold91_silver1073: {epochs: 7, scheduler_horizon: 20}
+    silver1073:        {epochs: 2, scheduler_horizon: 20}
+  amalia_9b:
+    gold91:            {epochs: 12, scheduler_horizon: 20}
+    gold91_silver266:  {epochs: 7, scheduler_horizon: 20}
+    gold91_silver535:  {epochs: 3, scheduler_horizon: 20}
+    gold91_silver802:  {epochs: 4, scheduler_horizon: 20}
+    gold91_silver1073: {epochs: 9, scheduler_horizon: 20}
+    silver1073:        {epochs: 4, scheduler_horizon: 20}
+  mistral_nemo:
+    gold91:            {epochs: 10, scheduler_horizon: 20}
+    gold91_silver266:  {epochs: 12, scheduler_horizon: 20}
+    gold91_silver535:  {epochs: 7, scheduler_horizon: 20}
+    gold91_silver802:  {epochs: 6, scheduler_horizon: 20}
+    gold91_silver1073: {epochs: 5, scheduler_horizon: 20}
+    silver1073:        {epochs: 6, scheduler_horizon: 20}

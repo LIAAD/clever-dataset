@@ -1,0 +1,62 @@
+# The six encoder-decoder models. `adaptation` is the fine-tuning family, decided by model
+# size: full fine-tuning below 1B parameters, LoRA from 1B to below 7B, QLoRA from 7B.
+# `physical_batch_size` is the fine-tuning batch per step; the effective batch of
+# configs/fine_tuning.yaml is kept by gradient accumulation.
+#
+# max_source_length is a safety limit: T5/mT5 use relative positions and every prompt is
+# far shorter, so no prompt is truncated. max_target_length equals max_new_tokens (192).
+
+models:
+  - short_name: ptt5_large
+    model_name_or_path: "unicamp-dl/ptt5-large-portuguese-vocab"
+    architecture: "encoder_decoder"
+    adaptation: "full_fine_tuning"
+    physical_batch_size: 8
+    language_group: "portuguese"
+    max_source_length: 4096
+    max_target_length: 192
+
+  - short_name: mt0_large
+    model_name_or_path: "bigscience/mt0-large"
+    architecture: "encoder_decoder"
+    adaptation: "lora"
+    physical_batch_size: 8
+    language_group: "multilingual"
+    max_source_length: 4096
+    max_target_length: 192
+
+  - short_name: ptt5v2_large
+    model_name_or_path: "unicamp-dl/ptt5-v2-large"
+    architecture: "encoder_decoder"
+    adaptation: "full_fine_tuning"
+    physical_batch_size: 8
+    language_group: "portuguese"
+    max_source_length: 4096
+    max_target_length: 192
+
+  - short_name: ptt5v2_3b
+    model_name_or_path: "unicamp-dl/ptt5-v2-3b"
+    architecture: "encoder_decoder"
+    adaptation: "lora"
+    physical_batch_size: 4
+    language_group: "portuguese"
+    max_source_length: 4096
+    max_target_length: 192
+
+  - short_name: mt5_xl
+    model_name_or_path: "google/mt5-xl"
+    architecture: "encoder_decoder"
+    adaptation: "lora"
+    physical_batch_size: 4
+    language_group: "multilingual"
+    max_source_length: 4096
+    max_target_length: 192
+
+  - short_name: mt0_xxl
+    model_name_or_path: "bigscience/mt0-xxl"
+    architecture: "encoder_decoder"
+    adaptation: "qlora"
+    physical_batch_size: 2
+    language_group: "multilingual"
+    max_source_length: 4096
+    max_target_length: 192

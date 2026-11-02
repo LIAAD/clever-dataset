@@ -1,0 +1,522 @@
+<img src="clever.png">
+
+## Overview
+**CLEVER** is a dataset of European Portuguese news articles annotated for **factual claims** and for their **verification with external evidence**, comprising **228 articles** and **1,187 claim and non-claim annotations**. The articles were provided by **LUSA, the Portuguese News Agency**, and are related to the Portuguese legislative election held on 18 May 2025. Claims were annotated independently by two annotators with expertise in journalism, and each article was reviewed by a linguistics specialist, following an annotation scheme grounded on [ClaimPT](https://github.com/LIAAD/ClaimPT). Each of the **140 claim spans** is further associated with manually formulated **verification questions**, the **news documents** these questions retrieve from the LUSA News Corpus, the **relevance** of each document, the **relation** of each relevant document to the claim span (*Supported*, *Refuted* or *Not Enough Information*, NEI), the **evidence excerpts** that sustain this relation, and a **verification** label for the claim span. CLEVER is released to support research on claim detection and question-driven fact-checking in European Portuguese, from the identification of claims in news articles, the generation of verification questions and the retrieval of evidence to the classification of its relation to the claim. Baselines are provided for **verification question generation**.
+
+
+
+## Repository Structure
+```
+├── dataset_sample/
+│   ├── annotations.jsonl
+│   ├── annotations.pretty.json
+│   └── news_articles/
+│       └── *.txt
+│
+├── generative_baselines/
+│   ├── configs/
+│   ├── split/
+│   ├── src/
+│   └── requirements.txt
+│
+├── CLEVER Annotation Manual.pdf
+│
+├── clever.png
+├── Licence
+└── README.md
+```
+---
+
+
+
+
+## Corpus Statistics
+
+### Articles and Claims
+
+| **Property**                                                  | **Description**                    |
+| ------------------------------------------------------------- | ---------------------------------- |
+| **Total Articles**                                            | 228                                |
+| **Average Article Length**                                    | 477.5 words                        |
+| **Annotated Articles (with at least one Claim or Non-Claim)** | 218                                |
+| **Claim Annotations**                                         | 115                                |
+| **Non-Claim Annotations**                                     | 1,072                              |
+| **Claim Spans**                                               | 140                                |
+| **Claim Objects**                                             | 142                                |
+| **Claimers**                                                  | 206                                |
+| **Time Expressions**                                          | 74                                 |
+| **Claim Topics**                                              | 115 (1 per claim)                  |
+| – Politics                                                    | 93                                 |
+| – Economy                                                     | 12                                 |
+| – Health                                                      | 4                                  |
+| – Society                                                     | 4                                  |
+| – International                                               | 1                                  |
+| – Science and Environment                                     | 1                                  |
+| **News Article Topics**                                       | 228 (1 per article, all politics)  |
+| **Publication Times**                                         | 228 (1 per article)                |
+
+### Verification Annotations
+
+| **Property**                                          | **Description**                     |
+| ----------------------------------------------------- | ----------------------------------- |
+| **Verification Questions**                            | 307 (2.19 per claim span)           |
+| – Claim spans with 1 question                         | 16                                  |
+| – Claim spans with 2 questions                        | 88                                  |
+| – Claim spans with 3 questions                        | 29                                  |
+| – Claim spans with 4 questions                        | 7                                   |
+| **Question-Document Retrievals (top 5 per question)** | 1,535                               |
+| **Claim Span-Document Pairs**                         | 1,269                               |
+| – Relevant                                            | 312 (24.6%)                         |
+| – Irrelevant                                          | 957 (75.4%)                         |
+| **Relations of the Relevant Pairs**                   | 312                                 |
+| – Supported                                           | 128 (41.0%)                         |
+| – Refuted                                             | 34 (10.9%)                          |
+| – NEI                                                 | 150 (48.1%)                         |
+| **Distinct LUSA Documents**                           | 1,162                               |
+| **Evidence Excerpts**                                 | 527                                 |
+| – In Supported pairs                                  | 187                                 |
+| – In Refuted pairs                                    | 54                                  |
+| – In NEI pairs                                        | 286                                 |
+| **Claim Span Verification**                           | 140                                 |
+| – Supported                                           | 60                                  |
+| – Refuted                                             | 17                                  |
+| – NEI                                                 | 63                                  |
+
+---
+
+
+## Data Format
+
+The **CLEVER** dataset is provided in **JSONL** format, where each line corresponds to a news article with its annotations (`annotations.pretty.json` has the same articles, indented).
+
+| Field | Description |
+|--------|-------------|
+| `document` | News article filename (the text is in `news_articles/`) |
+| `news_article_topic` | Topic of the news article |
+| `publication_time` | Date of the news publication (e.g., `07 mai 2025`) |
+| `items` | Annotated claims and non-claims of the article |
+| `identity_links` | Identity links between mentions of the same referent |
+| `id` | Unique identifier for each claim or non-claim |
+| `claim` | Boolean indicating whether the annotation is a claim (`true`) or non-claim (`false`) |
+| `begin_character` | Begin character offset of the annotated text span |
+| `end_character` | End character offset of the annotated text span |
+| `text_segment` | Text segment corresponding to the annotated span |
+| `claim_topic` | Topic of the claim (e.g., politics, economy, health) |
+| `stance` | Position of the claimer towards the claim: `Affirm` or `Refute` |
+| `claim_object` | Text and character offsets of the claim object (absent in one claim) |
+| `claimer` | Text, offsets and `type` (`person` or `institution`) of the entity making the claim |
+| `time` | Text and offsets of the temporal expression associated with the claim (`""` when there is none) |
+| `claim_span` | Object containing `text`, `begin` and `end` positions of the claim span, and its verification annotations |
+
+Non-claims have only the fields from `id` to `text_segment`. `claim_span`, `claim_object`, `claimer` and `time` are lists when there is more than one. Each identity link goes `from` one mention `to` another, each with its `label` (`claimer`, `claim_object`, `time` or `publication_time`), `text`, `begin` and `end`. `stance` and the claimer `type` are `null` in one claim, and `identity_links` in two articles.
+
+Besides `text`, `begin` and `end`, each claim span contains:
+
+| Field | Description |
+|--------|-------------|
+| `verification` | Verification label of the claim span: `Supported`, `Refuted` or `NEI` (see [Annotation Guidelines](#annotation-guidelines)) |
+| `questions` | Verification questions, each with a `question_id` and its `text` |
+| `retrieved_documents` | LUSA news documents retrieved by the questions |
+
+Each retrieved document contains:
+
+| Field | Description |
+|--------|-------------|
+| `doc_id` | Identifier of the document in CLEVER |
+| `lusa_doc_id` | Identifier of the document in LUSA |
+| `headline` | Headline of the news document |
+| `published_at` | Publication date and time of the news document |
+| `author` | Author of the news document |
+| `genre` | Journalistic genre (e.g., `Notícia`) |
+| `word_count` | Number of words of the news document |
+| `retrieved_by` | Questions that retrieved the document (`question_id`), with the document's `rank` for each (1 to 5) |
+| `relevant` | Boolean indicating whether the document is relevant to the claim span |
+| `relation` | Relation of the document to the claim span: `Supported`, `Refuted` or `NEI` (`null` for irrelevant documents) |
+| `evidence_excerpts` | Passages of the document that sustain the relation, each with an `evidence_id`, `text`, `begin` and `end` |
+| `content` | Full text of the news document |
+
+All offsets are character positions in the article text in `news_articles/` (starting at 0, end excluded), except those of evidence excerpts, which refer to the document `content`. `question_id`, `doc_id` and `evidence_id` are unique across the dataset. A document retrieved for several claim spans keeps its `doc_id`, but its `relevant`, `relation` and `evidence_excerpts` refer to each claim span.
+
+---
+
+### Example (JSON excerpt)
+
+The claim `clever_016_c7` with two of the eleven documents retrieved for its claim span (a *Supported* document with two evidence excerpts and an irrelevant one) and the three identity links of the article. Long texts are shortened with `[...]`.
+
+```json
+[
+  {
+    "document": "clever_016.txt",
+    "news_article_topic": "politics",
+    "publication_time": "07 mai 2025",
+    "items": [
+      {
+        "id": "clever_016_c7",
+        "claim": true,
+        "begin_character": 3686,
+        "end_character": 3830,
+        "text_segment": "Vi a AD, em determinados momentos, com muitas dúvidas sobre a questão da direção executiva e falou-se até de retirar poderes à direção executiva",
+        "claim_topic": "politics",
+        "stance": "Affirm",
+        "claim_object": {"text": "retirar poderes", "begin": 3795, "end": 3810},
+        "claimer": [
+          {"text": "O líder da IL", "begin": 787, "end": 800, "type": "person"},
+          {"text": "Rui Rocha", "begin": 942, "end": 951, "type": "person"},
+          {"text": "Rui Rocha", "begin": 3625, "end": 3634, "type": "person"}
+        ],
+        "time": {"text": "hoje", "begin": 179, "end": 183},
+        "claim_span": {
+          "text": "falou-se até de retirar poderes à direção executiva",
+          "begin": 3779,
+          "end": 3830,
+          "verification": "Supported",
+          "questions": [
+            {
+              "question_id": 41,
+              "text": "A AD falou em retirar poderes à direção executiva do SNS, durante o primeiro mandato de Luís Montenegro?"
+            },
+            {
+              "question_id": 42,
+              "text": "Quando é que a AD, durante o primeiro mandato de Luís Montenegro, falou em retirar poderes à direção executiva do SNS?"
+            },
+            {
+              "question_id": 43,
+              "text": "A AD chegou a ter muitas dúvidas sobre a direção executiva do SNS, durante o primeiro mandato de Luís Montenegro?"
+            }
+          ],
+          "retrieved_documents": [
+            {
+              "doc_id": 164,
+              "lusa_doc_id": "44493035",
+              "headline": "ENTREVISTA: Marta Temido lamenta \"oportunidade perdida\" com retirada de poderes à Direção Executiva do SNS (C/ÁUDIO E VÍDEO)",
+              "published_at": "2025-03-01T09:00:03",
+              "author": "João Roque",
+              "genre": "Notícia",
+              "word_count": 781,
+              "retrieved_by": [{"question_id": 41, "rank": 1}],
+              "relevant": true,
+              "relation": "Supported",
+              "evidence_excerpts": [
+                {
+                  "evidence_id": 75,
+                  "text": "A antiga ministra da Saúde Marta Temido lamenta a retirada de poderes à Direção Executiva do SNS por ser uma \"oportunidade perdida\" de melhorar a máquina dos cuidados de saúde, realçando que todos os grupos privados têm uma coordenação.",
+                  "begin": 171,
+                  "end": 407
+                },
+                {
+                  "evidence_id": 76,
+                  "text": "Marta Temido disse assistir à retirada de poderes à Direção Executiva com \"a compreensão de que a realidade é evolutiva\".",
+                  "begin": 2179,
+                  "end": 2300
+                }
+              ],
+              "content": "*** Serviços áudio e vídeo disponíveis em www.lusa.pt *** *** Helena Neves (texto), Hugo Fragata (vídeo) e André Kosters (fotos) (REPETIÇÃO) Lisboa, 01 mar 2025 (Lusa) [...]"
+            },
+            {
+              "doc_id": 174,
+              "lusa_doc_id": "38926220",
+              "headline": "Administradores Hospitalares manifestam dúvidas sobre nova direção executiva do SNS (C/ÁUDIO)",
+              "published_at": "2022-07-07T22:20:32",
+              "author": "Helena Neves Marques",
+              "genre": "Notícia",
+              "word_count": 509,
+              "retrieved_by": [{"question_id": 43, "rank": 4}],
+              "relevant": false,
+              "relation": null,
+              "evidence_excerpts": [],
+              "content": "*** Serviço áudio disponível em www.lusa.pt *** Lisboa, 07 jul 2022 (Lusa) [...]"
+            }
+          ]
+        }
+      }
+    ],
+    "identity_links": [
+      {
+        "from": {"label": "time", "text": "hoje", "begin": 179, "end": 183},
+        "to": {"label": "publication_time", "text": "07 mai 2025", "begin": 133, "end": 144}
+      },
+      {
+        "from": {"label": "claimer", "text": "O líder da IL", "begin": 787, "end": 800},
+        "to": {"label": "claimer", "text": "Rui Rocha", "begin": 942, "end": 951}
+      },
+      {
+        "from": {"label": "claimer", "text": "Rui Rocha", "begin": 3625, "end": 3634},
+        "to": {"label": "claimer", "text": "Rui Rocha", "begin": 942, "end": 951}
+      }
+    ]
+  }
+]
+```
+
+---
+
+## Annotation Guidelines
+
+Detailed annotation instructions, including procedures, quality-control measures, and schema definitions, are available in the document:
+
+📄 [CLEVER Annotation Manual (PDF)](CLEVER%20Annotation%20Manual.pdf)
+
+The annotation of CLEVER is summarized below: the claims and their attributes, the verification questions, the evidence retrieved with them and the verification of each claim span.
+
+### Claims
+
+The articles were provided by LUSA under a collaboration protocol: articles containing the keywords *Portuguese legislative elections*, filtered by comparing the first 300 characters of their body text against the query, with duplicates removed. Each article was annotated independently by two annotators with expertise in journalism and then reviewed by a linguistics specialist experienced in corpus curation, in the INCEpTION platform. The annotation scheme is grounded on the scheme of [ClaimPT](https://github.com/LIAAD/ClaimPT), with the following elements:
+
+* **Metadata:** the *News Article Topic* and the *Publication Time* of each article;
+* **Claim:** a factual assertion about the real world that can be verified and is of public relevance, typically a declarative sentence attributed to a source other than the journalist and marked by reporting verbs such as *state*, *assert* or *mention*;
+* **Non-Claim:** an utterance expressing an opinion, a belief or a personal judgment; non-claims are annotated with their text segment only. Statements about hypothetical or future events are not annotated as claims;
+* **Claim Span:** the exact text segment of an independently verifiable factual proposition of the claim; a claim can have several claim spans;
+* **Claim Object:** the core element or issue to which the claim span refers;
+* **Claimer:** the entity responsible for the claim, such as a person, an institution, a political party, an organization, a study, a report or an investigation;
+* **Stance:** the position of the claimer towards the content of the claim, affirming or refuting it;
+* **Time:** explicit, implicit or relative temporal expressions tied to the claim;
+* **Topic:** the thematic domain of the claim;
+* **Links:** attribute links connect each claim to its claim spans, claim objects, claimers and time expressions, and identity links connect mentions of the same referent, such as a pronoun and its antecedent or a temporal mention and the publication time.
+
+In the released files, the attribute links are represented by nesting the claim spans, claim objects, claimers and time expressions in their claim, and the identity links are listed in `identity_links`.
+
+Agreement between the two annotators was measured with the F1 (Sørensen-Dice) and the Jaccard overlap of their annotations, with a tolerance of ±4 characters at the span boundaries. The claim attributes were compared only on the claims identified by both annotators.
+
+| **Annotation** | **F1** | **Jaccard (%)** |
+|------------|------|------|
+| Claim | 0.4574 | 29.65 |
+| Non-Claim | 0.5301 | 36.06 |
+| Claim Span | 0.6711 | 50.50 |
+| Claim Object | 0.2906 | 17.00 |
+| Claimer | 0.4646 | 30.26 |
+| Time | 0.8478 | 73.58 |
+
+Micro-F1 is 0.5220 for Claim/Non-Claim and 0.5652 for the claim attributes (Macro-F1 0.4937 and 0.5685).
+
+### Verification Questions
+
+One or more verification questions were manually formulated for each claim span, to represent the factual information needed for its verification in a form suitable for evidence retrieval. The questions take into account the claim object of the claim span and any other annotated information needed to preserve its meaning:
+
+* questions are centered on the claim span and linked to its claim object, and a claim with several claim spans has independent questions for each of them;
+* the aim is to formulate two questions: a **general** question on the broad theme of the claim object and a **specific** question on the factual elements that require validation, such as numbers, dates, measures or names of institutions; a single question is formulated when the claim span cannot be split, and more questions when it has further facts to verify;
+* pronouns are replaced by the names of the entities they refer to;
+* questions are neutral, focus on the alleged fact rather than on the opinion of the claimer, and do not depend on whether the claimer affirms or refutes it;
+* questions include the temporal boundary of the claim and, for local claims, the region it refers to;
+* the claimer is included when the validity of the fact depends on who states it, claims about studies or reports ask for the specific document, and comparisons are split to obtain the values of both terms.
+
+### Evidence
+
+Each question was submitted to a search API over the **LUSA News Corpus**, considering only documents published before the article containing the claim, and the first five distinct news items were kept for each question, counting re-issues of the same news item once (1,535 retrievals). Documents retrieved by several questions of the same claim span were consolidated, giving **1,269 claim span-document pairs**, each annotated manually by one annotator:
+
+* **Relevance:** a document is *Relevant* when it contains information pertinent to the factual situation represented by the claim span, and *Irrelevant* otherwise. Sharing words with the claim span or with its questions is not enough: a document that concerns a different actor and factual episode is *Irrelevant*, even when it mentions the same entities;
+* **Relation:** each relevant document is classified as *Supported* (its evidence supports what the claim span asserts about the claim object), *Refuted* (its evidence contradicts it) or *NEI* (it does not contain sufficient information to establish either);
+* **Evidence excerpts:** for each relevant document, one or more passages that sustain its relation (for an *NEI* document, the passages that make it relevant).
+
+The verification questions determine which documents are retrieved, but do not take part in the relevance or relation decisions. They are kept as retrieval provenance in `retrieved_by`.
+
+### Verification
+
+The relations of the relevant documents of each claim span are aggregated into its `verification` label:
+
+| Relations of the relevant documents | Claim span verification |
+|---|---|
+| At least one *Supported* and no *Refuted* | `Supported` |
+| At least one *Refuted* and no *Supported* | `Refuted` |
+| Only *NEI* | `NEI` |
+| No relevant document | `NEI` |
+| Both *Supported* and *Refuted* | `NEI` |
+
+Researchers interested in replicating the annotation or training models should refer to the annotation manual.
+
+---
+
+## Dataset Access
+
+### Sample Dataset
+
+A sample subset (20 annotated articles) is included in the repository under the `dataset_sample/` directory: 8 articles with claims (11 claims, 12 claim spans, 27 verification questions and 110 claim span-document pairs, with 62 evidence excerpts) and 12 articles with only non-claims.
+
+### Full Dataset
+
+The complete dataset (228 articles) is protected by a **Data Use Agreement** and will be made available once the research paper is published.
+
+---
+
+## Dataset Split
+
+The dataset is divided into **train** and **test** subsets at the article level: each article is assigned entirely to one subset by a uniform draw over the 228 articles, so that the articles with claims give exactly 40 training and 100 test claim spans (29 and 48 articles), and the articles without claims are divided in the same proportion. Of the 1,162 distinct LUSA documents, 15 are retrieved for claim spans of both subsets.
+
+| Split     | # News Articles | Claims | Claim Spans | Questions | Claim Span-Document Pairs | Relevant (Supported / Refuted / NEI) | Evidence Excerpts | Verification (Supported / Refuted / NEI) |
+| --------- | --------------- | ------ | ----------- | --------- | ------------------------- | ------------------------------------ | ----------------- | ---------------------------------------- |
+| **Train** | 72              | 36     | 40          | 91        | 379                       | 95 (41 / 9 / 45)                     | 164               | 17 / 6 / 17                              |
+| **Test**  | 156             | 79     | 100         | 216       | 890                       | 217 (87 / 25 / 105)                  | 363               | 43 / 11 / 46                             |
+| **Total** | 228             | 115    | 140         | 307       | 1,269                     | 312 (128 / 34 / 150)                 | 527               | 60 / 17 / 63                             |
+
+---
+
+## Baselines
+
+Verification question generation is modeled as a **text-to-text generation task**: given a claim span *s*, its context *c* in the article and the publication date *p* of the article, a model generates a variable-sized set of verification questions *Q = G(s, c, p)*. The context supports the interpretation of references and implicit information in the claim span, and the publication date provides temporal grounding.
+
+### Models
+
+Fourteen pre-trained language models with publicly available weights, evaluated locally:
+
+* **Encoder-decoder:** PTT5 Large (740M), PTT5-v2 Large (738M) and 3B, mT0 Large (1.2B) and XXL (13.9B), and mT5 XL (3.7B);
+* **Decoder-only:** Tucano-1b1-Instruct (1.1B), Bode-7B-Alpaca, GlórIA-1.3B, Gervásio-8B PT-PT, AMALIA-9B-0626-DPO, Llama 3.2-1B-Instruct (1.2B), Llama 3.1-8B-Instruct and Mistral NeMo-12B-Instruct.
+
+### Settings
+
+* **Zero-shot:** the model receives only the task instruction and the input;
+* **3-shot:** three annotated claim spans of the training subset, with one, two and three reference questions, are included in the prompt;
+* **Fine-tuning:** the model is trained to generate the questions from the claim span, its context and the publication date. **Gold91** is the 91 questions of the 40 training claim spans, and **Silver1073** the 1,073 synthetic questions generated for 522 claim spans of [ClaimPT](https://github.com/LIAAD/ClaimPT). Six supervision configurations are compared: Gold91, Silver1073, and Gold91 with cumulative subsets of 266, 535, 802 and 1,073 synthetic questions. Models below 1B parameters are fully fine-tuned, models from 1B to below 7B use LoRA, and models of 7B or more use QLoRA.
+
+### Prompt
+
+The instruction and the input are in European Portuguese, and every model and setting receives the same text:
+
+```text
+És um sistema de geração de perguntas para fact-checking.
+Recebes um claim span, a data de publicação e o respetivo contexto (a frase anterior, a frase do claim span e a frase seguinte).
+Gera as perguntas que um fact-checker usaria para procurar a evidência que confirma ou desmente o facto alegado no claim span.
+Regras:
+1. Verifica o facto alegado no claim span, não a opinião nem a intenção de quem o disse.
+2. Escreve duas perguntas de níveis diferentes: a primeira geral, sobre o tema do claim span; a segunda específica, sobre o dado concreto a validar (valores, datas, medidas, nomes de instituições). Escreve apenas uma se o claim span não permitir duas perguntas distintas, e acrescenta uma terceira ou quarta só se sobrar outro facto do claim span por verificar.
+3. Perguntas neutras: sem termos que induzam a resposta e sem dar como certo que o claim é verdadeiro ou falso.
+4. Sem pronomes nem expressões vagas ("ele", "aquilo", "esta medida"): usa os nomes próprios que aparecem no claim span ou no contexto.
+5. Inclui a baliza temporal quando o facto depender dela, convertendo o tempo relativo com a data de publicação; inclui a região quando o facto for local; inclui quem afirma, tal como aparece no contexto, apenas quando a validade do facto depender da autoridade dele — não para citar o ato de fala. Não faças perguntas sobre a data de publicação em si.
+6. Se o claim span referir um estudo, relatório ou documento, formula a pergunta de modo a localizar esse documento. Se fizer uma comparação, escreve perguntas que obtenham os dois termos comparados.
+7. Não escrevas duas perguntas que digam o mesmo por outras palavras.
+Responde apenas com as perguntas, uma por linha, sem numeração.
+
+CLAIM SPAN:
+{claim_span}
+
+DATA DE PUBLICAÇÃO:
+{publication_time}
+
+CONTEXTO:
+{context}
+
+PERGUNTAS:
+```
+
+English translation:
+
+```text
+You are a question generation system for fact-checking.
+You receive a claim span, the publication date and its context (the previous sentence, the sentence of the claim span and the next sentence).
+Generate the questions that a fact-checker would use to search for the evidence that confirms or refutes the fact alleged in the claim span.
+Rules:
+1. Verify the fact alleged in the claim span, not the opinion or the intention of whoever said it.
+2. Write two questions of different levels: the first general, about the topic of the claim span; the second specific, about the concrete data to validate (values, dates, measures, names of institutions). Write only one if the claim span does not allow two distinct questions, and add a third or fourth only if another fact of the claim span remains to be verified.
+3. Neutral questions: without terms that induce the answer and without taking for granted that the claim is true or false.
+4. No pronouns or vague expressions ("he", "that", "this measure"): use the proper names that appear in the claim span or in the context.
+5. Include the temporal boundary when the fact depends on it, converting relative time with the publication date; include the region when the fact is local; include who makes the claim, as it appears in the context, only when the validity of the fact depends on their authority, not to cite the speech act. Do not ask questions about the publication date itself.
+6. If the claim span refers to a study, report or document, formulate the question so as to locate that document. If it makes a comparison, write questions that obtain the two compared terms.
+7. Do not write two questions that say the same in other words.
+Answer only with the questions, one per line, without numbering.
+
+CLAIM SPAN:
+{claim_span}
+
+PUBLICATION DATE:
+{publication_time}
+
+CONTEXT:
+{context}
+
+QUESTIONS:
+```
+
+In the 3-shot setting, the three demonstrations (the training claim spans `clever_002_c3`, `clever_016_c7` and `clever_141_c1_s1`, with two, three and one reference questions) come after the instruction, under `Exemplos:`, in the same format and separated by `---`, and `===` separates them from the input. In zero-shot and 3-shot, decoder-only models with a chat template receive the prompt as a user turn.
+
+### Evaluation
+
+The models are evaluated on the 100 test claim spans (216 reference questions, 2.16 per claim span). Question sets are unordered and may differ in size, so generated and reference questions are aligned one-to-one with the Hungarian algorithm. **H-BERT** is the Hungarian BERTScore-F1: the sum of the similarities of the matched pairs is divided by the size of the larger set, so that both missing and superfluous questions lower the score. Hungarian ROUGE-L and METEOR, a BERTScore-based coverage, the cardinality error and the number of generated questions per claim span are also computed. All metrics are macro-averaged over claim spans, and the scores below are reported ×100.
+
+### Results
+
+H-BERT on the 100 test claim spans under the six supervision configurations, with the best value of each row in bold:
+
+| **Model** | **Gold91** | **Gold91+Silver266** | **Gold91+Silver535** | **Gold91+Silver802** | **Gold91+Silver1073** | **Silver1073** |
+|------------|------|------|------|------|------|------|
+| PTT5 Large | 43.22 | 64.69 | 65.11 | 63.44 | 63.94 | **70.45** |
+| PTT5-v2 Large | 70.94 | 75.84 | 75.94 | **76.01** | 71.81 | 75.43 |
+| PTT5-v2 3B | 52.88 | 64.43 | 68.42 | 72.79 | 73.64 | **75.57** |
+| mT0 Large | 51.67 | 64.96 | 62.25 | 63.64 | 65.42 | **67.02** |
+| mT5 XL | 53.38 | 59.13 | 63.08 | 63.04 | **69.24** | 66.18 |
+| mT0 XXL | 74.12 | 68.15 | 73.97 | 72.80 | 73.58 | **75.69** |
+| Tucano-1b1-Instruct | 74.07 | 75.03 | 74.31 | **75.75** | 75.06 | 75.02 |
+| Bode-7B-Alpaca | 73.74 | **76.10** | 75.42 | 75.40 | 75.63 | 75.59 |
+| Llama 3.2-1B-Instruct | 66.35 | 74.17 | 74.51 | 74.69 | 75.14 | **75.17** |
+| Llama 3.1-8B-Instruct | 72.29 | 75.24 | **76.96** | 75.62 | 75.81 | 75.63 |
+| Mistral NeMo-12B-Instruct | 73.25 | 75.47 | **76.04** | 75.82 | 75.11 | 75.47 |
+| Gervásio-8B PT-PT | 72.84 | 75.41 | 74.83 | 73.64 | 75.78 | **75.89** |
+| AMALIA-9B-0626-DPO | 71.65 | 75.78 | 72.35 | 76.23 | **76.31** | 75.24 |
+| GlórIA-1.3B | 59.61 | 71.64 | 72.02 | 72.16 | 74.12 | **74.36** |
+| **Mean** | 65.00 | 71.15 | 71.80 | 72.22 | 72.90 | **73.77** |
+
+H-BERT in the zero-shot, 3-shot and fine-tuning settings, with the fine-tuned models in the main supervision configuration (Gold91+Silver1073) and the best value of each setting in bold:
+
+| **Model** | **Architecture** | **Language** | **Zero-shot** | **3-shot** | **Fine-tuned** |
+|------------|------|------|------|------|------|
+| PTT5 Large | Enc.-Dec. | PT-BR | 43.22 | 43.22 | 63.94 |
+| PTT5-v2 Large | Enc.-Dec. | PT (general) | 46.78 | 52.46 | 71.81 |
+| PTT5-v2 3B | Enc.-Dec. | PT (general) | 52.39 | 48.60 | 73.64 |
+| mT0 Large | Enc.-Dec. | Multilingual | 44.64 | 44.55 | 65.42 |
+| mT5 XL | Enc.-Dec. | Multilingual | 41.01 | 41.34 | 69.24 |
+| mT0 XXL | Enc.-Dec. | Multilingual | 37.35 | 45.53 | 73.58 |
+| Tucano-1b1-Instruct | Dec.-only | PT-BR | 40.11 | 32.63 | 75.06 |
+| Bode-7B-Alpaca | Dec.-only | PT-BR | 55.32 | 56.74 | 75.63 |
+| Llama 3.2-1B-Instruct | Dec.-only | Multilingual | 50.64 | 34.23 | 75.14 |
+| Llama 3.1-8B-Instruct | Dec.-only | Multilingual | 50.24 | 48.65 | 75.81 |
+| Mistral NeMo-12B-Instruct | Dec.-only | Multilingual | **75.52** | **75.88** | 75.11 |
+| Gervásio-8B PT-PT | Dec.-only | PT-PT | 43.50 | 50.10 | 75.78 |
+| AMALIA-9B-0626-DPO | Dec.-only | PT-PT | 70.25 | 72.13 | **76.31** |
+| GlórIA-1.3B | Dec.-only | PT-PT | 44.13 | 40.28 | 74.12 |
+
+### Code
+
+The code of the baselines is in [`generative_baselines/`](generative_baselines):
+
+| Path | Content |
+|---|---|
+| `src/prepare_data.py` | Training and test claim spans of the split, nested silver subsets and the training file of each supervision configuration |
+| `src/run_prompting.py` | Zero-shot and 3-shot generation for the test claim spans |
+| `src/finetune.py` | Fine-tuning on one supervision configuration and generation for the test claim spans |
+| `src/metrics.py` | H-BERT, Cov-BERT, H-ROUGE-L, H-METEOR, CountErr and Q/Ex. |
+| `src/prompts.py` | The prompt |
+| `configs/models_encdec.yaml`, `configs/models_decoder.yaml` | The 14 models, with the adaptation used in fine-tuning |
+| `configs/fine_tuning.yaml` | Learning rate of each adaptation, LoRA settings, supervision configurations and number of epochs of each model in each configuration |
+| `split/clever_split_ids_seed0.json` | The training and test claim spans (see [Dataset Split](#dataset-split)) |
+
+The code runs on the full dataset. The context of each claim span is taken from the article bodies, without headline, dateline and sign-off (`clean_files/` in the full dataset), and the configurations with silver supervision also need the ClaimPT claim spans with their synthetic questions and the ClaimPT articles. The experiments ran on NVIDIA A100 GPUs with 80 GB.
+
+```bash
+cd generative_baselines
+pip install -r requirements.txt
+python -c "import nltk; nltk.download('wordnet'); nltk.download('omw-2.0')"
+
+python src/prepare_data.py --clever <CLEVER>/clever.json --clever_articles <CLEVER>/clean_files \
+    --claimpt <ClaimPT silver files> --claimpt_articles <ClaimPT articles>
+python src/run_prompting.py --config configs/models_decoder.yaml --regime zero_shot --bf16
+python src/run_prompting.py --config configs/models_decoder.yaml --regime few_shot --bf16
+python src/finetune.py --config configs/models_decoder.yaml --configuration gold91_silver1073
+python src/metrics.py --predictions_dir outputs/predictions --metrics_dir outputs/metrics
+```
+
+`--config configs/models_encdec.yaml` runs the encoder-decoder models, `--only` selects models by their short name (e.g., `--only amalia_9b`), and `--configuration` is one of `gold91`, `gold91_silver266`, `gold91_silver535`, `gold91_silver802`, `gold91_silver1073` and `silver1073`.
+
+---
+
+## License
+
+**License:** [CC-BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/deed.en)
+
+This work is licensed under the **Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License**.
+
+**You are free to:**
+
+* Share: copy and redistribute the material in any medium or format
+
+**Under the following terms:**
+
+* **Attribution:** Credit must be given to the authors
+* **NonCommercial:** The material may not be used for commercial purposes
+* **NoDerivatives:** Modified versions may not be distributed

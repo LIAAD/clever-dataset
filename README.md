@@ -369,6 +369,24 @@ Each claim span was sent in a separate request to `gemini-3.5-flash`, with tempe
 | **Claim Spans with 2 Questions** | 493 |
 | **Claim Spans with 3 Questions** | 29 |
 
+### Sample
+
+`synthetic_questions_sample/` has the synthetic questions of the 17 claim spans in the 8 articles with claims of the [ClaimPT sample](https://github.com/LIAAD/ClaimPT/tree/main/dataset_sample) (35 questions). Each line of `annotations.jsonl` is one of these articles in the format of the ClaimPT sample, with its claims only and a `questions` list in each claim span (`annotations.pretty.json` has the same articles, indented); the article texts are in the ClaimPT sample. For example:
+
+```json
+"claim_span": {
+  "text": "foi convidado para aderir não pelo lado monárquico, no qual, aliás, não insistiam muito, mas por se empenhar, acima de tudo, na defesa do ambiente e na preservação da qualidade de vida",
+  "begin": 501,
+  "end": 685,
+  "questions": [
+    "Qual foi o motivo da inclusão do Partido Popular Monárquico (PPM) na Aliança Democrática (AD) em 1980?",
+    "O PPM foi convidado a integrar a Aliança Democrática em 1980 devido ao seu empenho na defesa do ambiente e da qualidade de vida, e não pela sua vertente monárquica?"
+  ]
+}
+```
+
+The complete set (522 claim spans and 1,073 questions) is distributed with ClaimPT, under its access conditions.
+
 ### Manual Evaluation
 
 A simple random sample of 50 claim spans (seed 42), with 104 questions, was evaluated manually in two dimensions: the general quality of the questions and their adherence to the question-formulation criteria of CLEVER. The evaluation was carried out by one of the authors and is a quality check, not an independent annotation. Each criterion is judged as met or not met and is counted in its own unit: the question (104) or the claim span (50; 30 for special-case compliance).
@@ -392,24 +410,6 @@ A simple random sample of 50 claim spans (seed 42), with 104 questions, was eval
 | **Special-case compliance** | The questions include the claimer when the validity of the fact depends on who states it, cover both terms of a comparison, and allow a study, report, poll or other document referred to in the claim span to be identified | Claim span | 26/30 (86.7%) |
 
 Special-case compliance is counted over the 30 claim spans to which at least one of the three cases applies, and a claim span complies only when all the cases that apply to it are satisfied.
-
-### Sample
-
-`synthetic_questions_sample/` has the synthetic questions of the 17 claim spans in the 8 articles with claims of the [ClaimPT sample](https://github.com/LIAAD/ClaimPT/tree/main/dataset_sample) (35 questions). Each line of `annotations.jsonl` is one of these articles in the format of the ClaimPT sample, with its claims only and a `questions` list in each claim span (`annotations.pretty.json` has the same articles, indented); the article texts are in the ClaimPT sample. For example:
-
-```json
-"claim_span": {
-  "text": "foi convidado para aderir não pelo lado monárquico, no qual, aliás, não insistiam muito, mas por se empenhar, acima de tudo, na defesa do ambiente e na preservação da qualidade de vida",
-  "begin": 501,
-  "end": 685,
-  "questions": [
-    "Qual foi o motivo da inclusão do Partido Popular Monárquico (PPM) na Aliança Democrática (AD) em 1980?",
-    "O PPM foi convidado a integrar a Aliança Democrática em 1980 devido ao seu empenho na defesa do ambiente e da qualidade de vida, e não pela sua vertente monárquica?"
-  ]
-}
-```
-
-The complete set (522 claim spans and 1,073 questions) is distributed with ClaimPT, under its access conditions.
 
 ---
 

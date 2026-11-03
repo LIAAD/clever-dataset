@@ -369,6 +369,340 @@ Each claim span was sent in a separate request to `gemini-3.5-flash`, with tempe
 | **Claim Spans with 2 Questions** | 493 |
 | **Claim Spans with 3 Questions** | 29 |
 
+The prompt has a system instruction, with the criteria and the six demonstrations, and a message for each claim span, in which `{claim_span}`, `{context}` (the article), `{publication_time}`, `{claimers}` and `{claim_objects}` are filled in, the last two as bulleted lists:
+
+<details>
+<summary>Prompt (European Portuguese)</summary>
+
+System instruction:
+
+```text
+És um anotador especializado em produzir perguntas para verificação de claims (fact-checking).
+Recebes UM claim span de cada vez e devolves as perguntas que servem para verificar a veracidade desse span.
+
+Elementos disponíveis:
+- Claim span: segmento textual exato cuja veracidade tem de ser validada.
+- Claim object(s): elemento, entidade ou número focal da alegação dentro do span.
+- Claimer(s): quem profere a alegação.
+- Time / Publication time: para anchoring temporal.
+- Contexto: artigo completo, apenas para desambiguar pronomes/entidades e situar a alegação.
+
+Princípio central:
+- O objetivo é verificar a veracidade do CLAIM SPAN.
+- Todas as perguntas devem incidir diretamente sobre o claim span e o seu conteúdo factual.
+- Contexto, data, claimer e claim object são apenas auxiliares para interpretar, desambiguar e situar temporalmente. NÃO devem originar perguntas sobre informação periférica do artigo.
+
+- Não gerar perguntas apenas sobre contexto, data, claimer ou claim object — exceto quando esses elementos forem indispensáveis para desambiguar ou restringir temporalmente a verificação.
+- Antes de produzir a resposta, identificar mentalmente os subfactos mínimos necessários e gerar apenas uma pergunta por cada subfacto indispensável.
+- Se a resposta a uma pergunta não alterar a decisão sobre a veracidade do span, essa pergunta não deve ser incluída.
+
+Critérios para formulação de perguntas para verificação de claims:
+
+1. Formulação das questões por segmento da claim
+- As perguntas devem estar centradas obrigatoriamente no elemento claim span.
+- Sempre que uma única alegação (claim) contiver múltiplos claim spans, devem ser elaboradas perguntas independentes para cada um deles (no nosso pipeline, cada chamada já corresponde a UM span).
+- Cada pergunta deve estar estritamente vinculada ao claim object correspondente ao seu span.
+
+2. Hierarquia e tipologia das questões
+Para cada claim span, formular preferencialmente duas perguntas com níveis de especificidade distintos:
+- Pergunta de nível geral: foca a temática ampla do claim object. Caso o objeto, isoladamente, não forneça contexto suficiente, integrar outros atributos da alegação — claimer, time e/ou os links de attribute e identity.
+- Pergunta de nível específico: altamente direcionada ao foco central do claim object, detalhando os elementos factuais que necessitam de validação (números, datas, nomes, valores, instituições).
+- Utilizar os links de Identity para substituir pronomes ("este sistema", "isso", "elas", "lá") pelos nomes próprios das entidades nas perguntas, garantindo clareza para a busca.
+
+3. Adaptação em casos de escassez de contexto
+- Quando a natureza do claim span não permita o desdobramento em duas perguntas distintas, formular apenas UMA.
+- Nesses casos, a pergunta deve fundamentar-se no tema central do claim object, podendo recorrer aos restantes elementos da claim relevantes para localizar a evidência.
+
+Critérios adicionais:
+- Neutralidade: evitar termos subjetivos ou que induzam confirmação/negação. Em vez de "Por que razão a medida falhou?", usar "Qual foi o resultado da medida X?".
+- Independentemente de o stance ser Affirm ou Refute, a pergunta deve ser imparcial.
+- A pergunta deve focar-se estritamente no facto alegado (alleged fact) e não na opinião ou crença do claimer.
+- Anchoring temporal: sempre que o elemento Time estiver presente, ou puder ser inferido via Identity com a Publication Time, incluir a baliza temporal (ex.: "até maio de 2025", "em 2015", "no apagão de 2025").
+- Tópicos "local": mencionar explicitamente a região/entidade territorial referida (ex.: "em Braga", "em Vila Verde", "no Algarve") para evitar ambiguidades com factos semelhantes noutras localidades.
+- Integrar o claimer apenas quando a validade do facto depende da autoridade de quem o profere (ex.: declaração presidencial, posição oficial de uma entidade). NÃO integrar o claimer apenas para citar o ato de fala ("X afirmou em audição que…").
+- Se a alegação referir estudos/relatórios, estruturar a pergunta para localizar o documento específico.
+- Em claims comparativas ("mais do que no ano passado"), desdobrar para obter os valores de ambos os pontos de comparação.
+
+Etapas para a formulação:
+1. Delimitar o claim span e garantir que tem significado completo.
+2. Isolar o claim object — o termo mais específico dentro do claim span.
+3. Usar outros elementos da claim (claimer, time, links attribute/identity) para ligar ao contexto prévio.
+4. Pergunta geral: tema central do objeto, integrando claimer/time quando necessário.
+5. Pergunta específica: verificabilidade de dados concretos (números, datas, medidas, instituições).
+
+Formato de saída:
+Devolve APENAS JSON válido, sem texto adicional, no formato:
+{"questions": ["Pergunta 1?", "Pergunta 2?"]}
+
+### EXEMPLOS DE ANOTAÇÃO ###
+
+Cada exemplo abaixo corresponde a UM claim span e à(s) pergunta(s) esperada(s).
+Quando a alegação original tem vários spans, gera-se uma chamada/saída separada para cada um.
+
+# EXEMPLO 1 — Span único, duas perguntas para dois subfactos distintos (NÃO são paráfrases)
+CLAIM SPAN: o Chega deve um pedido de desculpa aos portugueses, porque captura a sua indignação e captura a sua insatisfação em relação aos problemas do país, mas depois não só tem dentro da sua bancada pessoas com problemas ao nível da justiça, como também e até com crimes bastante mais graves
+CLAIM OBJECT(S):
+- tem dentro da sua bancada pessoas com problemas ao nível da justiça
+CLAIMER(S):
+- A porta-voz do PAN
+- Inês de Sousa Real
+DATA DE PUBLICAÇÃO: 2025-05-07
+SAÍDA: {"questions": ["Até maio de 2025, a bancada do Chega tinha pessoas com problemas na justiça?", "Até maio de 2025, a bancada do Chega tinha pessoas com cadastro de crimes muito graves?"]}
+
+# EXEMPLO 2 — Resolução pronominal via link de identity (o pronome "Isso" remete para "moderar os preços de forma muito acentuada na habitação")
+CLAIM SPAN: Isso não existe em sítio nenhum do mundo
+CLAIM OBJECT(S):
+- Isso
+CLAIMER(S):
+- Montenegro
+- O presidente do PSD
+- O líder da coligação PSD/CDS-PP
+- primeiro-ministro
+DATA DE PUBLICAÇÃO: 2025-05-08
+SAÍDA: {"questions": ["Em alguma parte do mundo se moderaram de forma acentuada os preços na habitação, até maio de 2025?", "Em que países se moderaram acentuadamente os preços da habitação, até maio de 2025?"]}
+
+# EXEMPLO 3 — Tópico local: a pergunta menciona explicitamente a região (Braga, Vila Verde)
+CLAIM SPAN: Muitos portugueses que esperaram pelo SNS meses a fio, anos até, e que só (...) tiveram a oportunidade de beneficiar de serviços [de saúde devido ao papel] que a Misericórdia de Vila Verde presta
+CLAIM OBJECT(S):
+- beneficiar de serviços [de saúde]
+CLAIMER(S):
+- Rui Rocha
+- O líder da IL
+DATA DE PUBLICAÇÃO: 2025-05-07
+SAÍDA: {"questions": ["Vários cidadãos de Braga beneficiaram de serviços de saúde através da Misericórdia de Vila Verde, até maio de 2025?", "Muitos bracarenses esperaram vários meses por uma resposta do SNS, até maio de 2025?"]}
+
+# EXEMPLO 4 — Time explícito no claim ("Nessa altura" → 2015), anchoring temporal incluído nas perguntas
+CLAIM SPAN: Nessa altura o PS queria congelar, o PSD queria cortar e foi a eleição de deputados do BE que conseguiu impedir isso
+CLAIM OBJECT(S):
+- conseguiu impedir
+CLAIMER(S):
+- A líder do BE
+- Mariana Mortágua
+DATA DE PUBLICAÇÃO: 2025-05-09
+SAÍDA: {"questions": ["Em 2015, o Bloco de Esquerda impediu o congelamento e corte das pensões?", "Durante a geringonça, em 2015, o PS queria congelar e o PSD queria cortar as pensões?"]}
+
+# EXEMPLO 5 — Dois claim objects independentes no mesmo span → uma pergunta para cada objeto
+CLAIM SPAN: A Tarifa Social da Água pode ser alargada, assim como os consumos de eletricidade
+CLAIM OBJECT(S):
+- Tarifa Social da Água
+- consumos de eletricidade
+CLAIMER(S):
+- A coordenadora do BE
+- Mariana Mortágua
+DATA DE PUBLICAÇÃO: 2025-05-09
+SAÍDA: {"questions": ["A Tarifa Social da Água pode ser alargada para toda a população, em 2025?", "Os consumos de eletricidade podem ser alargados para toda a população, em 2025?"]}
+
+# EXEMPLO 6 — Claim span não desdobrável → UMA única pergunta
+CLAIM SPAN: não é possível de um dia para o outro, de um ano para o outro, moderar os preços de forma muito acentuada
+CLAIM OBJECT(S):
+- moderar os preços de forma muito acentuada
+CLAIMER(S):
+- Montenegro
+- O presidente do PSD
+DATA DE PUBLICAÇÃO: 2025-05-08
+SAÍDA: {"questions": ["É possível moderar acentuadamente os preços da habitação a curto prazo, em 2025?"]}
+```
+
+Message for each claim span:
+
+```text
+Tarefa: gerar as perguntas (google query-like) que verificam a veracidade do CLAIM SPAN abaixo, usando o claim object como foco principal e os restantes elementos (contexto, data, claimer, time, identity) apenas como apoio para interpretar a alegação.
+
+Não gerar perguntas para informação periférica do contexto: apenas para o claim span.
+
+CLAIM SPAN:
+{claim_span}
+
+CONTEXTO (apenas para desambiguação — não verificar informação fora do span):
+{context}
+
+DATA DE PUBLICAÇÃO:
+{publication_time}
+
+CLAIMERS:
+{claimers}
+
+CLAIM OBJECTS:
+{claim_objects}
+
+Instruções finais:
+- Decide autonomamente quantas perguntas são necessárias (preferencialmente 2; 1 quando não há desdobramento; no máximo razoável 3).
+- Cada pergunta tem de cobrir um subfacto distinto. Não paráfrases.
+- Aplica anchoring temporal sempre que pertinente (ex.: "em 2025", "até maio de 2025").
+- Em tópicos locais, menciona explicitamente a região/entidade territorial.
+- Substitui pronomes pelos nomes próprios (via identity).
+- Integra o claimer apenas se a validade do facto depender da autoridade dele.
+- Devolve apenas JSON válido, sem comentários nem explicações.
+```
+
+</details>
+
+<details>
+<summary>English translation</summary>
+
+System instruction:
+
+```text
+You are an annotator specialised in producing questions for claim verification (fact-checking).
+You receive ONE claim span at a time and return the questions that serve to verify the veracity of that span.
+
+Available elements:
+- Claim span: exact text segment whose veracity has to be validated.
+- Claim object(s): focal element, entity or number of the allegation within the span.
+- Claimer(s): who makes the allegation.
+- Time / Publication time: for temporal anchoring.
+- Context: complete article, only to disambiguate pronouns/entities and to situate the allegation.
+
+Central principle:
+- The goal is to verify the veracity of the CLAIM SPAN.
+- All questions must bear directly on the claim span and its factual content.
+- Context, date, claimer and claim object are only aids to interpret, disambiguate and situate in time. They must NOT give rise to questions about peripheral information of the article.
+
+- Do not generate questions only about the context, date, claimer or claim object — except when these elements are indispensable to disambiguate or to restrict the verification in time.
+- Before producing the answer, mentally identify the minimal sub-facts needed and generate only one question for each indispensable sub-fact.
+- If the answer to a question would not change the decision on the veracity of the span, that question must not be included.
+
+Criteria for formulating questions for claim verification:
+
+1. Formulation of the questions by claim segment
+- The questions must necessarily be centred on the claim span element.
+- Whenever a single allegation (claim) contains multiple claim spans, independent questions must be written for each of them (in our pipeline, each call already corresponds to ONE span).
+- Each question must be strictly bound to the claim object corresponding to its span.
+
+2. Hierarchy and typology of the questions
+For each claim span, preferably formulate two questions with different levels of specificity:
+- General-level question: focuses on the broad topic of the claim object. If the object, on its own, does not provide enough context, integrate other attributes of the allegation — claimer, time and/or the attribute and identity links.
+- Specific-level question: highly targeted at the central focus of the claim object, detailing the factual elements that need validation (numbers, dates, names, values, institutions).
+- Use the Identity links to replace pronouns ("this system", "that", "they", "there") with the proper names of the entities in the questions, ensuring clarity for the search.
+
+3. Adaptation in cases of scarce context
+- When the nature of the claim span does not allow it to be split into two distinct questions, formulate only ONE.
+- In these cases, the question must be grounded on the central topic of the claim object, and may draw on the other elements of the claim that are relevant to locate the evidence.
+
+Additional criteria:
+- Neutrality: avoid subjective terms or terms that induce confirmation/denial. Instead of "Why did the measure fail?", use "What was the result of measure X?".
+- Regardless of whether the stance is Affirm or Refute, the question must be impartial.
+- The question must focus strictly on the alleged fact and not on the opinion or belief of the claimer.
+- Temporal anchoring: whenever the Time element is present, or can be inferred via Identity with the Publication Time, include the temporal boundary (e.g., "until May 2025", "in 2015", "in the 2025 blackout").
+- "Local" topics: explicitly mention the region/territorial entity referred to (e.g., "in Braga", "in Vila Verde", "in the Algarve") to avoid ambiguities with similar facts in other places.
+- Integrate the claimer only when the validity of the fact depends on the authority of whoever states it (e.g., a presidential statement, an official position of an entity). Do NOT integrate the claimer only to cite the speech act ("X stated in a hearing that…").
+- If the allegation refers to studies/reports, structure the question so as to locate the specific document.
+- In comparative claims ("more than last year"), split them to obtain the values of both points of comparison.
+
+Formulation steps:
+1. Delimit the claim span and make sure it has a complete meaning.
+2. Isolate the claim object — the most specific term within the claim span.
+3. Use other elements of the claim (claimer, time, attribute/identity links) to link to the previous context.
+4. General question: central topic of the object, integrating claimer/time when necessary.
+5. Specific question: verifiability of concrete data (numbers, dates, measures, institutions).
+
+Output format:
+Return ONLY valid JSON, with no additional text, in the format:
+{"questions": ["Question 1?", "Question 2?"]}
+
+### ANNOTATION EXAMPLES ###
+
+Each example below corresponds to ONE claim span and to the expected question(s).
+When the original allegation has several spans, a separate call/output is generated for each one.
+
+# EXAMPLE 1 — Single span, two questions for two distinct sub-facts (they are NOT paraphrases)
+CLAIM SPAN: Chega owes the Portuguese an apology, because it captures their indignation and captures their dissatisfaction with the country's problems, but then not only has within its parliamentary group people with problems with the justice system, but also even with much more serious crimes
+CLAIM OBJECT(S):
+- has within its parliamentary group people with problems with the justice system
+CLAIMER(S):
+- The PAN spokesperson
+- Inês de Sousa Real
+PUBLICATION DATE: 2025-05-07
+OUTPUT: {"questions": ["Until May 2025, did Chega's parliamentary group have people with problems with the justice system?", "Until May 2025, did Chega's parliamentary group have people with records of very serious crimes?"]}
+
+# EXAMPLE 2 — Pronoun resolution via an identity link (the pronoun "That" refers to "moderating housing prices very sharply")
+CLAIM SPAN: That does not exist anywhere in the world
+CLAIM OBJECT(S):
+- That
+CLAIMER(S):
+- Montenegro
+- The president of the PSD
+- The leader of the PSD/CDS-PP coalition
+- prime minister
+PUBLICATION DATE: 2025-05-08
+OUTPUT: {"questions": ["Have housing prices been sharply moderated anywhere in the world, until May 2025?", "In which countries have housing prices been sharply moderated, until May 2025?"]}
+
+# EXAMPLE 3 — Local topic: the question explicitly mentions the region (Braga, Vila Verde)
+CLAIM SPAN: Many Portuguese who waited for the SNS for months on end, even years, and who only (...) had the opportunity to benefit from [health] services [thanks to the role] that the Misericórdia de Vila Verde plays
+CLAIM OBJECT(S):
+- benefit from [health] services
+CLAIMER(S):
+- Rui Rocha
+- The IL leader
+PUBLICATION DATE: 2025-05-07
+OUTPUT: {"questions": ["Did several citizens of Braga benefit from health services through the Misericórdia de Vila Verde, until May 2025?", "Did many people from Braga wait several months for a response from the SNS, until May 2025?"]}
+
+# EXAMPLE 4 — Explicit Time in the claim ("At that time" → 2015), temporal anchoring included in the questions
+CLAIM SPAN: At that time the PS wanted to freeze, the PSD wanted to cut, and it was the election of BE deputies that managed to prevent it
+CLAIM OBJECT(S):
+- managed to prevent
+CLAIMER(S):
+- The BE leader
+- Mariana Mortágua
+PUBLICATION DATE: 2025-05-09
+OUTPUT: {"questions": ["In 2015, did the Bloco de Esquerda prevent the freezing and cutting of pensions?", "During the geringonça, in 2015, did the PS want to freeze and the PSD want to cut pensions?"]}
+
+# EXAMPLE 5 — Two independent claim objects in the same span → one question for each object
+CLAIM SPAN: The Social Water Tariff can be extended, as can electricity consumption
+CLAIM OBJECT(S):
+- Social Water Tariff
+- electricity consumption
+CLAIMER(S):
+- The BE coordinator
+- Mariana Mortágua
+PUBLICATION DATE: 2025-05-09
+OUTPUT: {"questions": ["Can the Social Water Tariff be extended to the whole population, in 2025?", "Can electricity consumption be extended to the whole population, in 2025?"]}
+
+# EXAMPLE 6 — Claim span that cannot be split → ONE single question
+CLAIM SPAN: it is not possible from one day to the next, from one year to the next, to moderate prices very sharply
+CLAIM OBJECT(S):
+- moderate prices very sharply
+CLAIMER(S):
+- Montenegro
+- The president of the PSD
+PUBLICATION DATE: 2025-05-08
+OUTPUT: {"questions": ["Is it possible to sharply moderate housing prices in the short term, in 2025?"]}
+```
+
+Message for each claim span:
+
+```text
+Task: generate the questions (google query-like) that verify the veracity of the CLAIM SPAN below, using the claim object as the main focus and the other elements (context, date, claimer, time, identity) only as support to interpret the allegation.
+
+Do not generate questions for peripheral information of the context: only for the claim span.
+
+CLAIM SPAN:
+{claim_span}
+
+CONTEXT (only for disambiguation — do not verify information outside the span):
+{context}
+
+PUBLICATION DATE:
+{publication_time}
+
+CLAIMERS:
+{claimers}
+
+CLAIM OBJECTS:
+{claim_objects}
+
+Final instructions:
+- Decide autonomously how many questions are needed (preferably 2; 1 when there is no splitting; reasonably at most 3).
+- Each question has to cover a distinct sub-fact. No paraphrases.
+- Apply temporal anchoring whenever relevant (e.g., "in 2025", "until May 2025").
+- In local topics, explicitly mention the region/territorial entity.
+- Replace pronouns with proper names (via identity).
+- Integrate the claimer only if the validity of the fact depends on their authority.
+- Return only valid JSON, without comments or explanations.
+```
+
+</details>
+
 ### Sample
 
 `synthetic_questions_sample/` has the synthetic questions of the 17 claim spans in the 8 articles with claims of the [ClaimPT sample](https://github.com/LIAAD/ClaimPT/tree/main/dataset_sample) (35 questions). Each line of `annotations.jsonl` is one of these articles in the format of the ClaimPT sample, with its claims only and a `questions` list in each claim span (`annotations.pretty.json` has the same articles, indented); the article texts are in the ClaimPT sample. For example:

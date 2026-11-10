@@ -23,7 +23,7 @@
 │   ├── src/
 │   └── requirements.txt
 │
-├── CLEVER Annotation Manual.pdf
+├── CLEVER_Annotation_Manual.pdf
 │
 ├── clever.png
 ├── Licence
@@ -260,7 +260,7 @@ The claim `clever_016_c7` with two of the eleven documents retrieved for its cla
 
 Detailed annotation instructions, including procedures, quality-control measures, and schema definitions, are available in the document:
 
-📄 [CLEVER Annotation Manual (PDF)](CLEVER%20Annotation%20Manual.pdf)
+📄 [CLEVER Annotation Manual (PDF)](CLEVER_Annotation_Manual.pdf)
 
 The annotation of CLEVER is summarized below: the claims and their attributes, the verification questions, the evidence retrieved with them and the verification of each claim span.
 

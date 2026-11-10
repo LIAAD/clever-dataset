@@ -41,14 +41,14 @@
 | **Property**                                                  | **Description**                    |
 | ------------------------------------------------------------- | ---------------------------------- |
 | **Total Articles**                                            | 228                                |
-| **Average Article Length**                                    | 477.5 words                        |
+| **Average Article Length**                                    | 475.5 words                        |
 | **Annotated Articles (with at least one Claim or Non-Claim)** | 218                                |
 | **Claim Annotations**                                         | 115                                |
 | **Non-Claim Annotations**                                     | 1,072                              |
 | **Claim Spans**                                               | 140                                |
-| **Claim Objects**                                             | 142                                |
-| **Claimers**                                                  | 206                                |
-| **Time Expressions**                                          | 74                                 |
+| **Claim Objects**                                             | 143                                |
+| **Claimers**                                                  | 198                                |
+| **Time Expressions**                                          | 72                                 |
 | **Claim Topics**                                              | 115 (1 per claim)                  |
 | – Politics                                                    | 93                                 |
 | – Economy                                                     | 12                                 |
@@ -97,7 +97,7 @@ The **CLEVER** dataset is provided in **JSONL** format, where each line correspo
 |--------|-------------|
 | `document` | News article filename (the text is in `news_articles/`) |
 | `news_article_topic` | Topic of the news article |
-| `publication_time` | Date of the news publication (e.g., `07 mai 2025`) |
+| `publication_time` | Date of the news publication, in ISO 8601 (e.g., `2025-05-07`) |
 | `items` | Annotated claims and non-claims of the article |
 | `identity_links` | Identity links between mentions of the same referent |
 | `id` | Unique identifier for each claim or non-claim |
@@ -107,12 +107,12 @@ The **CLEVER** dataset is provided in **JSONL** format, where each line correspo
 | `text_segment` | Text segment corresponding to the annotated span |
 | `claim_topic` | Topic of the claim (e.g., politics, economy, health) |
 | `stance` | Position of the claimer towards the claim: `Affirm` or `Refute` |
-| `claim_object` | Text and character offsets of the claim object (absent in one claim) |
-| `claimer` | Text, offsets and `type` (`person` or `institution`) of the entity making the claim |
-| `time` | Text and offsets of the temporal expression associated with the claim (`""` when there is none) |
-| `claim_span` | Object containing `text`, `begin` and `end` positions of the claim span, and its verification annotations |
+| `claim_object` | Claim objects of the claim, each with its text and character offsets |
+| `claimer` | Mentions of the entity making the claim, each with its text, offsets and `type` (`person` or `institution`) |
+| `time` | Temporal expressions associated with the claim, each with its text and offsets |
+| `claim_span` | Claim spans of the claim, each with its `text`, `begin` and `end` positions and its verification annotations |
 
-Non-claims have only the fields from `id` to `text_segment`. `claim_span`, `claim_object`, `claimer` and `time` are lists when there is more than one. Each identity link goes `from` one mention `to` another, each with its `label` (`claimer`, `claim_object`, `time` or `publication_time`), `text`, `begin` and `end`. `stance` and the claimer `type` are `null` in one claim, and `identity_links` in two articles.
+Non-claims have only the fields from `id` to `text_segment`. `claim_object`, `claimer`, `time` and `claim_span` are always lists; `time` is empty in 14 claims and `claimer` in one. Each identity link goes `from` one mention `to` another, each with its `label` (`claimer`, `claim_object`, `time` or `publication_time`), `text`, `begin` and `end`; the `text` is as written in the article (e.g., `07 mai 2025` for the publication time). `stance` and the claimer `type` are `null` in one claim, and `identity_links` in two articles.
 
 Besides `text`, `begin` and `end`, each claim span contains:
 
@@ -152,7 +152,7 @@ The claim `clever_016_c7` with two of the eleven documents retrieved for its cla
   {
     "document": "clever_016.txt",
     "news_article_topic": "politics",
-    "publication_time": "07 mai 2025",
+    "publication_time": "2025-05-07",
     "items": [
       {
         "id": "clever_016_c7",
@@ -162,76 +162,78 @@ The claim `clever_016_c7` with two of the eleven documents retrieved for its cla
         "text_segment": "Vi a AD, em determinados momentos, com muitas dúvidas sobre a questão da direção executiva e falou-se até de retirar poderes à direção executiva",
         "claim_topic": "politics",
         "stance": "Affirm",
-        "claim_object": {"text": "retirar poderes", "begin": 3795, "end": 3810},
+        "claim_object": [{"text": "retirar poderes", "begin": 3795, "end": 3810}],
         "claimer": [
           {"text": "O líder da IL", "begin": 787, "end": 800, "type": "person"},
           {"text": "Rui Rocha", "begin": 942, "end": 951, "type": "person"},
           {"text": "Rui Rocha", "begin": 3625, "end": 3634, "type": "person"}
         ],
-        "time": {"text": "hoje", "begin": 179, "end": 183},
-        "claim_span": {
-          "text": "falou-se até de retirar poderes à direção executiva",
-          "begin": 3779,
-          "end": 3830,
-          "verification": "Supported",
-          "questions": [
-            {
-              "question_id": 41,
-              "text": "A AD falou em retirar poderes à direção executiva do SNS, durante o primeiro mandato de Luís Montenegro?"
-            },
-            {
-              "question_id": 42,
-              "text": "Quando é que a AD, durante o primeiro mandato de Luís Montenegro, falou em retirar poderes à direção executiva do SNS?"
-            },
-            {
-              "question_id": 43,
-              "text": "A AD chegou a ter muitas dúvidas sobre a direção executiva do SNS, durante o primeiro mandato de Luís Montenegro?"
-            }
-          ],
-          "retrieved_documents": [
-            {
-              "doc_id": 164,
-              "lusa_doc_id": "44493035",
-              "headline": "ENTREVISTA: Marta Temido lamenta \"oportunidade perdida\" com retirada de poderes à Direção Executiva do SNS (C/ÁUDIO E VÍDEO)",
-              "published_at": "2025-03-01T09:00:03",
-              "author": "João Roque",
-              "genre": "Notícia",
-              "word_count": 781,
-              "retrieved_by": [{"question_id": 41, "rank": 1}],
-              "relevant": true,
-              "relation": "Supported",
-              "evidence_excerpts": [
-                {
-                  "evidence_id": 75,
-                  "text": "A antiga ministra da Saúde Marta Temido lamenta a retirada de poderes à Direção Executiva do SNS por ser uma \"oportunidade perdida\" de melhorar a máquina dos cuidados de saúde, realçando que todos os grupos privados têm uma coordenação.",
-                  "begin": 171,
-                  "end": 407
-                },
-                {
-                  "evidence_id": 76,
-                  "text": "Marta Temido disse assistir à retirada de poderes à Direção Executiva com \"a compreensão de que a realidade é evolutiva\".",
-                  "begin": 2179,
-                  "end": 2300
-                }
-              ],
-              "content": "*** Serviços áudio e vídeo disponíveis em www.lusa.pt *** *** Helena Neves (texto), Hugo Fragata (vídeo) e André Kosters (fotos) (REPETIÇÃO) Lisboa, 01 mar 2025 (Lusa) [...]"
-            },
-            {
-              "doc_id": 174,
-              "lusa_doc_id": "38926220",
-              "headline": "Administradores Hospitalares manifestam dúvidas sobre nova direção executiva do SNS (C/ÁUDIO)",
-              "published_at": "2022-07-07T22:20:32",
-              "author": "Helena Neves Marques",
-              "genre": "Notícia",
-              "word_count": 509,
-              "retrieved_by": [{"question_id": 43, "rank": 4}],
-              "relevant": false,
-              "relation": null,
-              "evidence_excerpts": [],
-              "content": "*** Serviço áudio disponível em www.lusa.pt *** Lisboa, 07 jul 2022 (Lusa) [...]"
-            }
-          ]
-        }
+        "time": [{"text": "hoje", "begin": 179, "end": 183}],
+        "claim_span": [
+          {
+            "text": "falou-se até de retirar poderes à direção executiva",
+            "begin": 3779,
+            "end": 3830,
+            "verification": "Supported",
+            "questions": [
+              {
+                "question_id": 41,
+                "text": "A AD falou em retirar poderes à direção executiva do SNS, durante o primeiro mandato de Luís Montenegro?"
+              },
+              {
+                "question_id": 42,
+                "text": "Quando é que a AD, durante o primeiro mandato de Luís Montenegro, falou em retirar poderes à direção executiva do SNS?"
+              },
+              {
+                "question_id": 43,
+                "text": "A AD chegou a ter muitas dúvidas sobre a direção executiva do SNS, durante o primeiro mandato de Luís Montenegro?"
+              }
+            ],
+            "retrieved_documents": [
+              {
+                "doc_id": 164,
+                "lusa_doc_id": "44493035",
+                "headline": "ENTREVISTA: Marta Temido lamenta \"oportunidade perdida\" com retirada de poderes à Direção Executiva do SNS (C/ÁUDIO E VÍDEO)",
+                "published_at": "2025-03-01T09:00:03",
+                "author": "João Roque",
+                "genre": "Notícia",
+                "word_count": 781,
+                "retrieved_by": [{"question_id": 41, "rank": 1}],
+                "relevant": true,
+                "relation": "Supported",
+                "evidence_excerpts": [
+                  {
+                    "evidence_id": 75,
+                    "text": "A antiga ministra da Saúde Marta Temido lamenta a retirada de poderes à Direção Executiva do SNS por ser uma \"oportunidade perdida\" de melhorar a máquina dos cuidados de saúde, realçando que todos os grupos privados têm uma coordenação.",
+                    "begin": 171,
+                    "end": 407
+                  },
+                  {
+                    "evidence_id": 76,
+                    "text": "Marta Temido disse assistir à retirada de poderes à Direção Executiva com \"a compreensão de que a realidade é evolutiva\".",
+                    "begin": 2179,
+                    "end": 2300
+                  }
+                ],
+                "content": "*** Serviços áudio e vídeo disponíveis em www.lusa.pt *** *** Helena Neves (texto), Hugo Fragata (vídeo) e André Kosters (fotos) (REPETIÇÃO) Lisboa, 01 mar 2025 (Lusa) [...]"
+              },
+              {
+                "doc_id": 174,
+                "lusa_doc_id": "38926220",
+                "headline": "Administradores Hospitalares manifestam dúvidas sobre nova direção executiva do SNS (C/ÁUDIO)",
+                "published_at": "2022-07-07T22:20:32",
+                "author": "Helena Neves Marques",
+                "genre": "Notícia",
+                "word_count": 509,
+                "retrieved_by": [{"question_id": 43, "rank": 4}],
+                "relevant": false,
+                "relation": null,
+                "evidence_excerpts": [],
+                "content": "*** Serviço áudio disponível em www.lusa.pt *** Lisboa, 07 jul 2022 (Lusa) [...]"
+              }
+            ]
+          }
+        ]
       }
     ],
     "identity_links": [
@@ -277,7 +279,7 @@ The articles were provided by LUSA under a collaboration protocol: articles cont
 * **Topic:** the thematic domain of the claim;
 * **Links:** attribute links connect each claim to its claim spans, claim objects, claimers and time expressions, and identity links connect mentions of the same referent, such as a pronoun and its antecedent or a temporal mention and the publication time.
 
-In the released files, the attribute links are represented by nesting the claim spans, claim objects, claimers and time expressions in their claim, and the identity links are listed in `identity_links`.
+In the released files, the attribute links are represented by nesting the claim spans, claim objects, claimers and time expressions in their claim, and the identity links are listed in `identity_links`. Each claim also nests the claimer and time mentions connected by identity links, directly or through other mentions, to the ones linked to it, and the claim objects connected in the same way whose text lies within the claim.
 
 Agreement between the two annotators was measured with the F1 (Sørensen-Dice) and the Jaccard overlap of their annotations, with a tolerance of ±4 characters at the span boundaries. The claim attributes were compared only on the claims identified by both annotators.
 
